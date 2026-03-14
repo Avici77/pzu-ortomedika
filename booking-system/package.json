@@ -1,0 +1,36 @@
+{
+  "name": "booking-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "watch": "nodemon --watch server.js --watch db.js --watch public --ext js,html,css server.js",
+    "browser": "browser-sync start --proxy http://127.0.0.1:4000 --files 'public/**/*.{html,css,js},server.js,db.js' --port 4001 --ui-port 4002 --no-open --no-notify",
+    "dev:live": "concurrently -k \"npm:watch\" \"npm:browser\"",
+    "backup:db": "bash ./scripts/backup-db.sh",
+    "backup:daily": "bash ./scripts/backup-rotate.sh",
+    "restore:db": "bash ./scripts/restore-db.sh",
+    "pm2:start": "pm2 start ecosystem.config.js --env production",
+    "pm2:restart": "pm2 restart booking-system",
+    "pm2:logs": "pm2 logs booking-system",
+    "test": "echo \"No automated tests yet\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.0",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.4",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14"
+  }
+}

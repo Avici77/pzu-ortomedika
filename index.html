@@ -68,7 +68,7 @@
  <li><a href="#about">Работно време</a></li>
  <li><a href="#contact">Контакт</a></li>
  <li>
- <a href="#booking" class="btn-appoint">Закажи термин</a>
+ <a href="#" data-booking-link="true" class="btn-appoint">Закажи термин</a>
  </li>
  </ul>
  </div>
@@ -84,7 +84,7 @@
  <div class="banner-text text-center">
  <h1 class="white">Пзу Ортомедика</h1>
  <p>Приватна специјалистичка ординација по ортопедија.</p>
- <a href="#booking" class="btn-appoint">Закажи термин</a>
+ <a href="#" data-booking-link="true" class="btn-appoint">Закажи термин</a>
  <a href="tel:070235138" class="hero-cta-phone"><i class="fa fa-phone"></i>&nbsp;070235138</a>
  </div>
  <div class="overlay-detail text-center">
@@ -223,86 +223,6 @@
  <section id="booking" class="section-padding booking-section">
  <div class="container">
  <div class="row">
- <div class="col-md-12">
- <h2 class="ser-title">Закажи преглед</h2>
- <hr class="botm-line" />
- </div>
-
- <div class="col-md-12 col-sm-12 marb20">
- <div class="booking-card">
- <p class="booking-intro">Пополнете ги полињата подолу и ние ќе ве контактираме за потврда.</p>
- <form id="appointmentForm" class="form-horizontal booking-form">
- <div class="hp-field" aria-hidden="true">
- <label for="websiteField">Website</label>
- <input type="text" id="websiteField" name="website" tabindex="-1" autocomplete="off" />
- </div>
-
- <div class="form-group">
- <label class="col-sm-3 control-label">Име и презиме*</label>
- <div class="col-sm-9">
- <input type="text" id="fullName" class="form-control" required />
- </div>
- </div>
-
- <div class="form-group">
- <label class="col-sm-3 control-label">Е-пошта*</label>
- <div class="col-sm-9">
- <input type="email" id="email" class="form-control" required />
- </div>
- </div>
-
- <div class="form-group">
- <label class="col-sm-3 control-label">Телефон*</label>
- <div class="col-sm-9">
- <input type="tel" id="phone" class="form-control" required />
- </div>
- </div>
-
- <div class="form-group">
- <label class="col-sm-3 control-label">Датум*</label>
- <div class="col-sm-4">
- <input type="date" id="preferredDate" class="form-control" required />
- </div>
- <label class="col-sm-1 control-label">Време*</label>
- <div class="col-sm-4">
- <select id="preferredTime" class="form-control" required>
- <option value="" selected disabled>Прво изберете датум</option>
- </select>
- <span id="timeValidationMsg" style="display:none; font-size:12px; color:red;">Време мора да биде на полни или половини часови (xx:00 или xx:30).</span>
- </div>
- </div>
-
- <div class="form-group">
- <label class="col-sm-3 control-label">Тип на услуга</label>
- <div class="col-sm-9">
- <select id="serviceType" class="form-control" required>
- <option value="" disabled selected>Изберете услуга</option>
- <option value="преглед кај деца и бебиња">преглед кај деца и бебиња</option>
- <option value="преглед кај возрасни">преглед кај возрасни</option>
- <option value="ултразвучен преглед">ултразвучен преглед</option>
- <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
- </select>
- </div>
- </div>
-
- <div class="form-group">
- <label class="col-sm-3 control-label">Белешки</label>
- <div class="col-sm-9">
- <textarea id="notes" rows="3" class="form-control"></textarea>
- </div>
- </div>
-
- <div class="form-group">
- <div class="col-sm-offset-3 col-sm-9">
- <button type="submit" class="btn booking-submit">Закажи</button>
- <span id="bookingMessage" class="booking-message"></span>
- </div>
- </div>
- </form>
- </div>
-
- <!-- admin controls removed -->
- </div>
  </div>
  </div>
  </section>
@@ -389,14 +309,24 @@
  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
- <!-- EmailJS (client-side email) - replace placeholders with your keys -->
- <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+ <script src="js/config.js"></script>
  <!-- js/custom.js is missing, commenting it out to prevent 404 error -->
  <!-- <script src="js/custom.js"></script> -->
 
  <!-- Navbar scroll behavior and active section highlighting -->
  <script>
  $(document).ready(function () {
+ var bookingUrl = window.BOOKING_URL || "booking-system/public/index.html";
+
+ $("[data-booking-link='true']").each(function () {
+ $(this).attr("href", bookingUrl);
+ });
+
+ var bookingUrlTextEl = document.getElementById("bookingUrlText");
+ if (bookingUrlTextEl) {
+ bookingUrlTextEl.textContent = bookingUrl;
+ }
+
  // Navbar background change on scroll
  $(window).scroll(function () {
  if ($(window).scrollTop() > 50) {
@@ -480,319 +410,16 @@
  $("#myNavbar").collapse("hide");
  }
  });
- });
- </script>
 
- <script>
- (function () {
- // Configure these with your EmailJS account values
- var EMAILJS_SERVICE_ID = 'service_sphl081';
- var EMAILJS_TEMPLATE_ID = 'template_fcl2lcl';
- var EMAILJS_PUBLIC_KEY = 'shYO9Z4KNu8noeYAa';
- function getAppointments() {
- return JSON.parse(localStorage.getItem("appointments") || "[]");
- }
- function saveAppointments(a) {
- localStorage.setItem("appointments", JSON.stringify(a));
- }
- function escapeHtml(s) {
- return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
- }
- function renderBookings() {
- var list = getAppointments();
- var container = document.getElementById("bookingsList");
- if (!container) return;
- if (!list.length) {
- container.innerHTML = '<p>Нема закажувања</p>';
- return;
- }
- var html = '<table class="table table-striped"><thead><tr><th>Име</th><th>Е-пошта</th><th>Тел.</th><th>Датум</th><th>Време</th><th>Услуга</th><th>Белешки</th></tr></thead><tbody>';
- list.forEach(function (a) {
- html += '<tr><td>' + escapeHtml(a.name) + '</td><td>' + escapeHtml(a.email) + '</td><td>' + escapeHtml(a.phone) + '</td><td>' + escapeHtml(a.date) + '</td><td>' + escapeHtml(a.time) + '</td><td>' + escapeHtml(a.service) + '</td><td>' + escapeHtml(a.notes) + '</td></tr>';
- });
- html += '</tbody></table>';
- container.innerHTML = html;
- }
-
- // Check if time has valid minute (00 or 30 only)
- function isValidTimeMinute(timeStr) {
- var timeParts = timeStr.split(':');
- var minutes = parseInt(timeParts[1], 10);
- return minutes === 0 || minutes === 30;
- }
-
- function getWorkingWindowByDay(dayOfWeek) {
- if (dayOfWeek === 1 || dayOfWeek === 4) return { start: 12 * 60, end: 20 * 60 };
- if (dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 5) return { start: 8 * 60, end: 16 * 60 };
- return null;
- }
-
- function formatTimeFromMinutes(totalMinutes) {
- var h = Math.floor(totalMinutes / 60);
- var m = totalMinutes % 60;
- return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
- }
-
- // Check if date/time is within working hours
- function isWithinWorkingHours(dateStr, timeStr) {
- var date = new Date(dateStr + 'T00:00:00');
- var dayOfWeek = date.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
- var window = getWorkingWindowByDay(dayOfWeek);
- if (!window) return false;
-
- var timeParts = timeStr.split(':');
- var hour = parseInt(timeParts[0], 10);
- var minute = parseInt(timeParts[1], 10);
- var timeInMinutes = (hour * 60) + minute;
- return isValidTimeMinute(timeStr) && timeInMinutes >= window.start && timeInMinutes <= (window.end - 30);
- }
-
- // Update time validation on change
- var dateInput = document.getElementById("preferredDate");
- var timeInput = document.getElementById("preferredTime");
- if (dateInput && timeInput) {
- var today = new Date();
- var yyyy = today.getFullYear();
- var mm = String(today.getMonth() + 1).padStart(2, '0');
- var dd = String(today.getDate()).padStart(2, '0');
- dateInput.min = yyyy + '-' + mm + '-' + dd;
-
- function renderTimeOptions(dateStr) {
- var previousValue = timeInput.value;
- timeInput.innerHTML = '';
-
- function appendOption(value, text, disabled, selected) {
- var opt = document.createElement('option');
- opt.value = value;
- opt.textContent = text;
- if (disabled) opt.disabled = true;
- if (selected) opt.selected = true;
- timeInput.appendChild(opt);
- }
-
- if (!dateStr) {
- appendOption('', 'Прво изберете датум', true, true);
- return;
- }
-
- var d = new Date(dateStr + 'T00:00:00');
- var window = getWorkingWindowByDay(d.getDay());
-
- if (!window) {
- appendOption('', 'Нема термини (неработен ден)', true, true);
- return;
- }
-
- appendOption('', 'Изберете време', true, true);
- var hasPrev = false;
- for (var t = window.start; t <= (window.end - 30); t += 30) {
- var value = formatTimeFromMinutes(t);
- appendOption(value, value, false, false);
- if (value === previousValue) hasPrev = true;
- }
-
- if (hasPrev) {
- timeInput.value = previousValue;
- }
- }
-
- function validateTimeSelection() {
- var date = dateInput.value;
- var time = timeInput.value;
- var msgEl = document.getElementById("timeValidationMsg");
- if (!date || !time) {
- if (msgEl) msgEl.style.display = 'none';
- return;
- }
-
- if (!isValidTimeMinute(time)) {
- if (msgEl) msgEl.style.display = 'block';
- if (msgEl) msgEl.textContent = 'Време мора да биде на полни или половини часови (xx:00 или xx:30)';
- } else if (date && time && !isWithinWorkingHours(date, time)) {
- if (msgEl) msgEl.style.display = 'block';
- if (msgEl) msgEl.textContent = 'Последен термин е 19:30 за смена до 20:00 (или 15:30 за смена до 16:00).';
- } else {
- if (msgEl) msgEl.style.display = 'none';
- }
- }
-
- renderTimeOptions(dateInput.value);
- dateInput.addEventListener("change", function () {
- renderTimeOptions(dateInput.value);
- validateTimeSelection();
- });
- timeInput.addEventListener("change", validateTimeSelection);
- }
-
- var form = document.getElementById("appointmentForm");
- if (form) {
- var LAST_SUBMIT_TS_KEY = 'booking_last_submit_ts';
- var SUBMIT_COOLDOWN_MS = 60 * 1000;
- var submitBtn = form.querySelector('button[type="submit"]');
- var defaultSubmitLabel = submitBtn ? submitBtn.textContent : 'Закажи';
-
- function setSubmitState(isSending) {
- if (!submitBtn) return;
- submitBtn.disabled = isSending;
- submitBtn.innerHTML = isSending ? '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i>Испраќање...' : defaultSubmitLabel;
- }
-
- function setBookingMessage(msgEl, text, isError) {
- if (!msgEl) return;
- msgEl.textContent = text;
- msgEl.style.color = isError ? '#c0392b' : '#1f7f67';
- }
-
- form.addEventListener("submit", function (e) {
+ $("[data-booking-link='true']").on("click", function (e) {
+ var href = $(this).attr("href");
+ if (href && href.indexOf("http") === 0) {
  e.preventDefault();
- var now = Date.now();
- var lastSubmitTs = parseInt(localStorage.getItem(LAST_SUBMIT_TS_KEY) || '0', 10);
- var elapsed = now - lastSubmitTs;
- var remainingMs = SUBMIT_COOLDOWN_MS - elapsed;
-
- var name = document.getElementById("fullName").value.trim();
- var email = document.getElementById("email").value.trim();
- var phone = document.getElementById("phone").value.trim();
- var date = document.getElementById("preferredDate").value;
- var timeInputEl = document.getElementById("preferredTime");
- var time = timeInputEl ? timeInputEl.value : '';
- var serviceType = document.getElementById("serviceType").value;
- var notes = document.getElementById("notes").value.trim();
- var honeypot = document.getElementById("websiteField");
-
- var msgEl = document.getElementById("bookingMessage");
-
- if (honeypot && honeypot.value.trim() !== '') {
- setBookingMessage(msgEl, "Неуспешно испраќање. Обидете се повторно.", true);
- return;
- }
-
- if (remainingMs > 0) {
- var remainingSec = Math.ceil(remainingMs / 1000);
- setBookingMessage(msgEl, 'Ве молиме почекајте ' + remainingSec + ' сек. пред повторно закажување.', true);
- return;
- }
-
- if (!name || !email || !phone || !date || !time) {
- setBookingMessage(msgEl, "Пополнете ги сите обавезни полиња.", true);
- return;
- }
-
- if (dateInput && dateInput.min && date < dateInput.min) {
- setBookingMessage(msgEl, "Не може да изберете минат датум.", true);
- return;
- }
-
- // Validate time is within working hours
- if (!isWithinWorkingHours(date, time)) {
- setBookingMessage(msgEl, "Време надвор од работно време. Ве молиме изберете време за време на работа.", true);
- return;
- }
-
- // Validate time minutes are 00 or 30
- if (!isValidTimeMinute(time)) {
- setBookingMessage(msgEl, "Време мора да биде на полни или половини часови (xx:00 или xx:30).", true);
- return;
- }
-
- setSubmitState(true);
- setBookingMessage(msgEl, 'Се испраќа закажувањето...', false);
-
- var appt = { id: Date.now(), name: name, email: email, phone: phone, date: date, time: time, service: serviceType, notes: notes, created: new Date().toISOString() };
- var appts = getAppointments();
- appts.push(appt);
- saveAppointments(appts);
-
- // Try to send via EmailJS if configured, otherwise fallback to mailto
- if (window.emailjs && EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID' && EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
- try {
- emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
- var templateParams = {
- to_email: 'pzuortomedika@gmail.com',
- to_name: 'ПЗУ Ортомедика',
- name: name,
- from_name: name,
- email: email,
- from_email: email,
- reply_to: email,
- phone: phone,
- date: date,
- time: time,
- service: serviceType,
- notes: notes,
- subject: 'Ново закажување: ' + name + ' - ' + date + ' ' + time,
- message: 'Име: ' + name + '\nЕ-пошта: ' + email + '\nТелефон: ' + phone + '\nДатум: ' + date + '\nВреме: ' + time + '\nУслуга: ' + serviceType + '\nБелешки: ' + notes
- };
- emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
- .then(function () {
- localStorage.setItem(LAST_SUBMIT_TS_KEY, String(Date.now()));
- setBookingMessage(msgEl, 'Закажувањето е успешно испратено. Ќе ве контактираме наскоро.', false);
- form.reset();
- setSubmitState(false);
- }, function (err) {
- console.error('EmailJS error', err);
- var detail = (err && (err.text || err.message || err.status)) ? (' (' + (err.text || err.message || err.status) + ')') : '';
- setBookingMessage(msgEl, 'Грешка при праќање на е-пошта. Обидете се повторно.' + detail, true);
- setSubmitState(false);
- });
- } catch (err) {
- console.error(err);
- setBookingMessage(msgEl, 'Грешка при праќање на е-пошта. ' + (err && err.message ? err.message : ''), true);
- setSubmitState(false);
- }
- } else {
- localStorage.setItem(LAST_SUBMIT_TS_KEY, String(Date.now()));
- setBookingMessage(msgEl, 'Закажувањето е зачувано локално. Отворете ваш поштенски клиент за потврда.', false);
- var subject = encodeURIComponent('Закажување - ' + name + ' ' + date + ' ' + time);
- var body = encodeURIComponent('Име: ' + name + '\nЕ-пошта: ' + email + '\nТелефон: ' + phone + '\nДатум: ' + date + '\nВреме: ' + time + '\nУслуга: ' + serviceType + '\nБелешки: ' + notes);
- window.location.href = 'mailto:pzuortomedika@gmail.com?subject=' + subject + '&body=' + body;
- form.reset();
- setSubmitState(false);
+ window.location.href = href;
  }
  });
- }
-
- var viewBtn = document.getElementById("viewBookingsBtn");
- if (viewBtn) {
- viewBtn.addEventListener("click", function () {
- var admin = document.getElementById("bookingsAdmin");
- admin.style.display = admin.style.display === "none" ? "block" : "none";
- renderBookings();
  });
- }
-
- var exportBtn = document.getElementById("exportCsvBtn");
- if (exportBtn) {
- exportBtn.addEventListener("click", function () {
- var rows = getAppointments();
- if (!rows.length) {
- alert("Нема закажувања");
- return;
- }
- var csv = 'Име,Е-пошта,Телефон,Датум,Време,Услуга,Белешки\n';
- rows.forEach(function (r) {
- csv += [r.name, r.email, r.phone, r.date, r.time, r.service, r.notes].map(function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; }).join(',') + '\n';
- });
- var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
- var url = URL.createObjectURL(blob);
- var a = document.createElement('a');
- a.href = url;
- a.download = 'appointments.csv';
- document.body.appendChild(a); a.click(); a.remove();
- URL.revokeObjectURL(url);
- });
- }
-
- var clearBtn = document.getElementById("clearBookingsBtn");
- if (clearBtn) {
- clearBtn.addEventListener("click", function () {
- if (!confirm('Дали сте сигурни дека сакате да ги избришете сите закажувања?')) return;
- localStorage.removeItem('appointments');
- renderBookings();
- alert('Закажувањата се избришани.');
- });
- }
- })();
  </script>
+
  </body>
 </html>

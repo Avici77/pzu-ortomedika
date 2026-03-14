@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="mk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ПЗУ Ортомедика - Админ</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f8f7; color: #133332; }
+    .wrap { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    h1, h2 { margin-top: 0; }
+    label { display: block; font-weight: 700; margin: 8px 0 6px; }
+    input, select, button { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; }
+    input, select { height: 42px; }
+    button { background: #1fa884; border: none; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #179977; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border-bottom: 1px solid #e4efec; text-align: left; padding: 8px; font-size: 14px; }
+    .muted { color: #607c77; font-size: 14px; }
+    .req { color: #b42318; margin-left: 2px; }
+    .msg-success { color: #18794e; }
+    .msg-error { color: #b42318; }
+    .row-actions { display: flex; gap: 8px; }
+    .small { width: auto; padding: 6px 10px; }
+    .day-view-head { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+    .day-view-head > div { min-width: 220px; }
+    .status-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .status-free { background: #e8f6f2; color: #0f7f64; }
+    .status-booked { background: #ffeecf; color: #8f5f00; }
+    .status-confirmed { background: #dff2ff; color: #0d5f92; }
+    .status-cancelled { background: #f2f4f6; color: #586774; }
+    .status-completed { background: #e8f5e9; color: #2e7d32; }
+    .inline-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .tool-btn { width: auto; padding: 6px 10px; font-size: 13px; background: #eaf7f3; color: #1a7f66; border: 1px solid #cfe1dd; }
+    .tool-btn:hover { background: #dff2ec; }
+    #__bs_notify__ { display: none !important; }
+    #__bs_notify__ + div { display: none !important; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+      <button id="logoutBtn" class="small" style="margin:0;">Одјави се</button>
+    </div>
+    <div class="card">
+      <h2>Дневен преглед</h2>
+      <div class="day-view-head">
+        <div>
+          <label>Датум</label>
+          <input id="dayViewDate" type="date" />
+        </div>
+        <div>
+          <button id="refreshDayView" class="small">Освежи преглед</button>
+        </div>
+      </div>
+      <p id="dayViewSummary" class="muted">Одбери датум за преглед.</p>
+      <table>
+        <thead><tr><th>Време</th><th>Состојба</th><th>Пациент</th><th>Телефон</th><th>Услуга</th><th>Забелешка</th></tr></thead>
+        <tbody id="dayViewRows"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Додади термин (телефон)</h2>
+      <div class="grid">
+        <div><label>Датум <span class="req">*</span></label><input id="manDate" type="date" required /></div>
+        <div><label>Термин (време) <span class="req">*</span></label><select id="manTime" required><option value="">Прво одберете датум</option></select></div>
+        <div><label>Пациент *</label><input id="manPatient" type="text" required /></div>
+        <div><label>Телефон *</label><input id="manPhone" type="tel" inputmode="numeric" pattern="[0-9]+" required /></div>
+        <div><label>Е-пошта (опц.)</label><input id="manEmail" type="email" /></div>
+        <div><label>Услуга</label>
+          <select id="manService" required>
+            <option value="" selected disabled>Изберете преглед</option>
+            <option value="преглед кај деца и бебиња">преглед кај деца и бебиња</option>
+            <option value="преглед кај возрасни">преглед кај возрасни</option>
+            <option value="ултразвучен преглед">ултразвучен преглед</option>
+            <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
+          </select>
+        </div>
+        <div><label>Забелешка</label><input id="manNotes" type="text" placeholder="Телефонско закажување" /></div>
+      </div>
+      <button id="addManualAppointment" class="small">Додади термин</button>
+      <p id="manualMessage" class="muted" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="card">
+      <h2>Блокирај датум/време (одмор, отсутност)</h2>
+      <div class="grid" style="margin-top:12px; border-top:1px solid #e4efec; padding-top:12px;">
+        <div><label>Од датум <span class="req">*</span></label><input id="blFromDate" type="date" /></div>
+        <div><label>До датум <span class="req">*</span></label><input id="blToDate" type="date" /></div>
+        <div><label>Почеток <span class="req">*</span></label><input id="blRangeStart" type="time" step="1800" value="08:00" /></div>
+        <div><label>Крај <span class="req">*</span></label><input id="blRangeEnd" type="time" step="1800" value="16:00" /></div>
+      </div>
+      <button id="addBlockRange" class="small">Блокирај период</button>
+      <p id="blockRangeMessage" class="muted" role="status" aria-live="polite"></p>
+
+      <table>
+        <tbody id="blockRows"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <h2 style="margin:0;">Термини</h2>
+        <div class="row-actions" style="align-items:center;">
+          <span id="appointmentsFilterLabel" class="muted"></span>
+          <button id="toggleAppointmentsScope" class="small" style="margin:0;">Прикажи сите</button>
+          <button id="exportAppointmentsCsv" class="small" style="margin:0;">Експорт CSV</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Датум</th><th>Време</th><th>Пациент</th><th>Телефон</th><th>Услуга</th><th>Статус</th><th></th></tr></thead>
+        <tbody id="appointmentRows"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    let currentDoctorId = null;
+    const manDateEl = document.getElementById("manDate");
+    const manTimeEl = document.getElementById("manTime");
+    const manPatientEl = document.getElementById("manPatient");
+    const manPhoneEl = document.getElementById("manPhone");
+    const manEmailEl = document.getElementById("manEmail");
+    const manServiceEl = document.getElementById("manService");
+    const manNotesEl = document.getElementById("manNotes");
+    const manualMessageEl = document.getElementById("manualMessage");
+    const blFromDateEl = document.getElementById("blFromDate");
+    const blToDateEl = document.getElementById("blToDate");
+    const blRangeStartEl = document.getElementById("blRangeStart");
+    const blRangeEndEl = document.getElementById("blRangeEnd");
+    const blockRangeMessageEl = document.getElementById("blockRangeMessage");
+    const dayViewDateEl = document.getElementById("dayViewDate");
+    const dayViewRowsEl = document.getElementById("dayViewRows");
+    const dayViewSummaryEl = document.getElementById("dayViewSummary");
+    const appointmentsFilterLabelEl = document.getElementById("appointmentsFilterLabel");
+    const toggleAppointmentsScopeBtn = document.getElementById("toggleAppointmentsScope");
+    let showAllAppointments = false;
+
+    function toDateInputValue(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function statusLabel(status) {
+      if (status === "booked") return "Закажан";
+      if (status === "confirmed") return "Потврден";
+      if (status === "cancelled") return "Откажан";
+      if (status === "completed") return "Завршен";
+      return status;
+    }
+
+    function statusClass(status) {
+      if (status === "booked") return "status-booked";
+      if (status === "confirmed") return "status-confirmed";
+      if (status === "cancelled") return "status-cancelled";
+      if (status === "completed") return "status-completed";
+      return "status-cancelled";
+    }
+
+    function formatDateToMk(dateStr) {
+      const [year, month, day] = String(dateStr || "").split("-");
+      if (!year || !month || !day) return dateStr || "";
+      return `${day}.${month}.${year}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, options);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Request failed");
+      return data;
+    }
+
+    async function loadDoctors() {
+      const doctors = await fetchJson("/api/doctors");
+      if (!doctors.length) {
+        throw new Error("Нема активни доктори");
+      }
+      currentDoctorId = Number(doctors[0].id);
+      await syncRangeHoursToClinic();
+      await refreshAll();
+    }
+
+    async function syncRangeHoursToClinic() {
+      if (!currentDoctorId || !blFromDateEl.value) return;
+
+      try {
+        const fromDate = blFromDateEl.value;
+        const toDate = blToDateEl.value || fromDate;
+
+        const [fromData, toData] = await Promise.all([
+          fetchJson(`/api/admin/working-hours?doctorId=${currentDoctorId}&date=${fromDate}`),
+          fetchJson(`/api/admin/working-hours?doctorId=${currentDoctorId}&date=${toDate}`),
+        ]);
+
+        if (!fromData.earliest || !fromData.latest) {
+          blockRangeMessageEl.className = "muted msg-error";
+          blockRangeMessageEl.textContent = "Нема дефинирано работно време за Од датум.";
+          return;
+        }
+
+        if (!toData.earliest || !toData.latest) {
+          blockRangeMessageEl.className = "muted msg-error";
+          blockRangeMessageEl.textContent = "Нема дефинирано работно време за До датум.";
+          return;
+        }
+
+        blRangeStartEl.min = fromData.earliest;
+        blRangeStartEl.max = fromData.latest;
+        blRangeEndEl.min = toData.earliest;
+        blRangeEndEl.max = toData.latest;
+
+        blRangeStartEl.value = fromData.earliest;
+        blRangeEndEl.value = toData.latest;
+
+        blockRangeMessageEl.className = "muted";
+        blockRangeMessageEl.textContent = `Од: ${fromData.earliest}-${fromData.latest} • До: ${toData.earliest}-${toData.latest}`;
+      } catch (error) {
+        blockRangeMessageEl.className = "muted msg-error";
+        blockRangeMessageEl.textContent = error.message;
+      }
+    }
+
+    async function refreshAll() {
+      await Promise.all([loadBlocks(), loadAppointments()]);
+      await Promise.all([loadManualSlots(), loadDayView()]);
+    }
+
+    async function loadDayView() {
+      const doctorId = currentDoctorId;
+      const date = dayViewDateEl.value;
+
+      if (!doctorId || !date) {
+        dayViewRowsEl.innerHTML = "";
+        dayViewSummaryEl.textContent = "Одбери датум за преглед.";
+        return;
+      }
+
+      const [appointments, slotsResponse] = await Promise.all([
+        fetchJson(`/api/admin/appointments?doctorId=${doctorId}`),
+        fetchJson(`/api/slots?doctorId=${doctorId}&date=${date}`),
+      ]);
+      const freeSlots = Array.isArray(slotsResponse) ? slotsResponse : (slotsResponse.slots || []);
+
+      const onDateAppointments = appointments.filter((a) => a.date === date);
+
+      const entries = [
+        ...freeSlots.map((slot) => ({
+          time: slot.start,
+          end: slot.end,
+          status: "free",
+          patient: "",
+          phone: "",
+          service: "",
+          notes: "",
+        })),
+        ...onDateAppointments.map((a) => ({
+          time: a.start_time,
+          end: a.end_time,
+          status: a.status,
+          patient: a.patient_name || "",
+          phone: a.patient_phone || "",
+          service: a.service_type || "",
+          notes: a.notes || "",
+        })),
+      ].sort((a, b) => a.time.localeCompare(b.time));
+
+      if (!entries.length) {
+        dayViewRowsEl.innerHTML = `<tr><td colspan="6" class="muted">Нема термини за овој датум.</td></tr>`;
+        dayViewSummaryEl.textContent = `${date} • Нема записи`;
+        return;
+      }
+
+      const freeCount = entries.filter((e) => e.status === "free").length;
+      const bookedCount = entries.filter((e) => e.status === "booked" || e.status === "confirmed").length;
+      dayViewSummaryEl.textContent = `${date} • Зафатени: ${bookedCount} • Слободни: ${freeCount}`;
+
+      dayViewRowsEl.innerHTML = entries
+        .map((entry) => {
+          const chip =
+            entry.status === "free"
+              ? `<span class="status-chip status-free">Слободен</span>`
+              : `<span class="status-chip ${statusClass(entry.status)}">${statusLabel(entry.status)}</span>`;
+
+          const safeTime = escapeHtml(entry.time);
+          const safeEnd = escapeHtml(entry.end);
+          const safePatient = escapeHtml(entry.patient);
+          const safePhone = escapeHtml(entry.phone);
+          const safeService = escapeHtml(entry.service);
+          const safeNotes = escapeHtml(entry.notes);
+
+          return `
+            <tr>
+              <td>${safeTime} - ${safeEnd}</td>
+              <td>${chip}</td>
+              <td>${safePatient}</td>
+              <td>${safePhone}</td>
+              <td>${safeService}</td>
+              <td>${safeNotes}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    async function loadManualSlots() {
+      const doctorId = currentDoctorId;
+      const date = manDateEl.value;
+
+      if (!doctorId || !date) {
+        manTimeEl.innerHTML = `<option value="">Прво одберете датум</option>`;
+        return;
+      }
+
+      try {
+        const slotsResponse = await fetchJson(`/api/slots?doctorId=${doctorId}&date=${date}`);
+        const slots = Array.isArray(slotsResponse) ? slotsResponse : (slotsResponse.slots || []);
+        if (!slots.length) {
+          manTimeEl.innerHTML = `<option value="">Нема слободни термини</option>`;
+          return;
+        }
+        manTimeEl.innerHTML = slots
+          .map((slot) => {
+            const safeStart = escapeHtml(slot.start);
+            const safeEnd = escapeHtml(slot.end);
+            return `<option value="${safeStart}">${safeStart} - ${safeEnd}</option>`;
+          })
+          .join("");
+      } catch {
+        manTimeEl.innerHTML = `<option value="">Грешка при вчитување</option>`;
+      }
+    }
+
+    async function loadBlocks() {
+      const rows = await fetchJson(`/api/admin/blocks?doctorId=${currentDoctorId}`);
+      const tbody = document.getElementById("blockRows");
+      tbody.innerHTML = rows
+        .map((r) => {
+          const safeId = Number(r.id) || 0;
+          const safeDate = escapeHtml(formatDateToMk(r.date));
+          const safeStart = escapeHtml(r.start_time);
+          const safeEnd = escapeHtml(r.end_time);
+          const safeReason = escapeHtml(r.reason || "");
+          return `
+            <tr>
+              <td>${safeDate}</td>
+              <td>${safeStart}</td>
+              <td>${safeEnd}</td>
+              <td>${safeReason}</td>
+              <td><button class="small" onclick="deleteBlock(${safeId})">Избриши</button></td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function getAppointmentsFilterParams() {
+      const params = new URLSearchParams({ doctorId: String(currentDoctorId) });
+      if (!showAllAppointments && dayViewDateEl.value) {
+        params.set("from", dayViewDateEl.value);
+        params.set("to", dayViewDateEl.value);
+      }
+      return params;
+    }
+
+    function updateAppointmentsFilterUi() {
+      if (showAllAppointments) {
+        appointmentsFilterLabelEl.textContent = "Прикажани: сите датуми";
+        toggleAppointmentsScopeBtn.textContent = "Само избран датум";
+        return;
+      }
+
+      const selected = dayViewDateEl.value;
+      appointmentsFilterLabelEl.textContent = selected
+        ? `Прикажани: ${formatDateToMk(selected)}`
+        : "Прикажани: избран датум";
+      toggleAppointmentsScopeBtn.textContent = "Прикажи сите";
+    }
+
+    async function loadAppointments() {
+      const params = getAppointmentsFilterParams();
+      const rows = await fetchJson(`/api/admin/appointments?${params.toString()}`);
+      rows.sort((a, b) => {
+        const left = `${a.date} ${a.start_time}`;
+        const right = `${b.date} ${b.start_time}`;
+        return right.localeCompare(left);
+      });
+      updateAppointmentsFilterUi();
+      const tbody = document.getElementById("appointmentRows");
+      tbody.innerHTML = rows
+        .map((r) => {
+          const safeId = Number(r.id) || 0;
+          const safeDate = escapeHtml(formatDateToMk(r.date));
+          const safeStart = escapeHtml(r.start_time);
+          const safeEnd = escapeHtml(r.end_time);
+          const safePatient = escapeHtml(r.patient_name);
+          const safePhone = escapeHtml(r.patient_phone);
+          const safeService = escapeHtml(r.service_type || "");
+          return `
+            <tr>
+              <td>${safeDate}</td>
+              <td>${safeStart} - ${safeEnd}</td>
+              <td>${safePatient}</td>
+              <td>${safePhone}</td>
+              <td>${safeService}</td>
+              <td>
+                <select onchange="updateStatus(${safeId}, this.value)">
+                  ${[
+                    { value: "booked", label: "Закажан" },
+                    { value: "cancelled", label: "Откажан" },
+                    { value: "completed", label: "Завршен" }
+                  ].map(s => `<option value="${s.value}" ${s.value===r.status?"selected":""}>${s.label}</option>`).join("")}
+                </select>
+              </td>
+              <td></td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    async function addBlockRange() {
+      blockRangeMessageEl.className = "muted";
+      blockRangeMessageEl.textContent = "";
+
+      const payload = {
+        doctorId: currentDoctorId,
+        fromDate: blFromDateEl.value,
+        toDate: blToDateEl.value,
+        startTime: blRangeStartEl.value,
+        endTime: blRangeEndEl.value,
+        fullDay: true,
+        reason: "",
+      };
+
+      if (!payload.fromDate || !payload.toDate || !payload.startTime || !payload.endTime) {
+        blockRangeMessageEl.className = "muted msg-error";
+        blockRangeMessageEl.textContent = "Внесете од/до датум и почеток/крај.";
+        return;
+      }
+
+      const data = await fetchJson("/api/admin/blocks/range", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      blockRangeMessageEl.className = "muted msg-success";
+      blockRangeMessageEl.textContent = `Додадени: ${data.inserted}, прескокнати: ${data.skipped}.`;
+      await Promise.all([loadBlocks(), loadDayView(), loadManualSlots()]);
+    }
+
+    async function addManualAppointment() {
+      manualMessageEl.textContent = "";
+      manualMessageEl.className = "muted";
+
+      const payload = {
+        doctorId: currentDoctorId,
+        date: manDateEl.value,
+        startTime: manTimeEl.value,
+        patientName: manPatientEl.value.trim(),
+        patientPhone: manPhoneEl.value.trim(),
+        patientEmail: manEmailEl.value.trim(),
+        serviceType: manServiceEl.value.trim(),
+        notes: manNotesEl.value.trim(),
+      };
+
+      if (!payload.date || !payload.startTime || !payload.patientName || !payload.patientPhone) {
+        manualMessageEl.className = "muted msg-error";
+        manualMessageEl.textContent = "Внесете датум, термин, пациент и телефон.";
+        return;
+      }
+
+      await fetchJson("/api/admin/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      manualMessageEl.className = "muted msg-success";
+      manualMessageEl.textContent = "Терминот е успешно додаден.";
+      manPatientEl.value = "";
+      manPhoneEl.value = "";
+      manEmailEl.value = "";
+      manServiceEl.value = "";
+      manNotesEl.value = "";
+      await Promise.all([loadAppointments(), loadManualSlots(), loadDayView()]);
+    }
+
+    async function deleteBlock(id) {
+      await fetchJson(`/api/admin/blocks/${id}`, { method: "DELETE" });
+      await Promise.all([loadBlocks(), loadDayView()]);
+    }
+
+    async function updateStatus(id, status) {
+      await fetchJson(`/api/admin/appointments/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      await Promise.all([loadAppointments(), loadDayView(), loadManualSlots()]);
+    }
+
+    window.deleteBlock = deleteBlock;
+    window.updateStatus = updateStatus;
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await fetch("/api/admin/auth/logout", { method: "POST" });
+      window.location.href = "/admin/login";
+    });
+
+    document.getElementById("addBlockRange").addEventListener("click", async () => {
+      try {
+        await addBlockRange();
+      } catch (error) {
+        blockRangeMessageEl.className = "muted msg-error";
+        blockRangeMessageEl.textContent = error.message;
+      }
+    });
+    blFromDateEl.addEventListener("change", async () => {
+      if (blToDateEl.value && blToDateEl.value < blFromDateEl.value) {
+        blToDateEl.value = blFromDateEl.value;
+      }
+      await syncRangeHoursToClinic();
+    });
+    blToDateEl.addEventListener("change", async () => {
+      if (blToDateEl.value && blFromDateEl.value && blToDateEl.value < blFromDateEl.value) {
+        blToDateEl.value = blFromDateEl.value;
+      }
+      await syncRangeHoursToClinic();
+    });
+    document.getElementById("refreshDayView").addEventListener("click", async () => {
+      try {
+        await loadDayView();
+      } catch (error) {
+        dayViewSummaryEl.textContent = error.message;
+      }
+    });
+    document.getElementById("addManualAppointment").addEventListener("click", async () => {
+      try {
+        await addManualAppointment();
+      } catch (error) {
+        manualMessageEl.className = "muted msg-error";
+        manualMessageEl.textContent = error.message;
+      }
+    });
+    document.getElementById("exportAppointmentsCsv").addEventListener("click", () => {
+      if (!currentDoctorId) return;
+      const params = getAppointmentsFilterParams();
+      window.location.href = `/api/admin/appointments/export.csv?${params.toString()}`;
+    });
+    toggleAppointmentsScopeBtn.addEventListener("click", async () => {
+      showAllAppointments = !showAllAppointments;
+      await loadAppointments();
+    });
+    manDateEl.addEventListener("change", loadManualSlots);
+    dayViewDateEl.addEventListener("change", async () => {
+      await loadDayView();
+      if (!showAllAppointments) {
+        await loadAppointments();
+      }
+    });
+    manPhoneEl.addEventListener("input", () => {
+      manPhoneEl.value = manPhoneEl.value.replace(/\D/g, "");
+    });
+
+    const today = toDateInputValue();
+    manDateEl.min = today;
+    blFromDateEl.min = today;
+    blToDateEl.min = today;
+    dayViewDateEl.min = today;
+    manDateEl.value = today;
+    blFromDateEl.value = today;
+    blToDateEl.value = today;
+    dayViewDateEl.value = today;
+
+    loadDoctors();
+  </script>
+</body>
+</html>

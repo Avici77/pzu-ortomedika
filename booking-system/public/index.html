@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="mk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ПЗУ Ортомедика - Онлајн Закажување</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f8f7; color: #133332; }
+    .wrap { max-width: 860px; margin: 30px auto; padding: 0 16px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border: 1px solid #cfe1dd;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #1a7f66;
+      text-decoration: none;
+      font-weight: 700;
+      line-height: 1;
+      transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
+    }
+    .back-link-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #eaf7f3;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .back-link:hover {
+      background: #eaf7f3;
+      border-color: #b6ddd5;
+      color: #146b56;
+    }
+    .back-link:hover .back-link-icon {
+      transform: translateX(-1px);
+    }
+    .back-link:focus-visible {
+      outline: 3px solid rgba(31, 168, 132, .28);
+      outline-offset: 2px;
+    }
+    .back-link:active {
+      transform: translateY(1px);
+    }
+    .card { background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 18px; box-shadow: 0 8px 22px rgba(18,50,50,.06); }
+    h1 { margin-top: 0; }
+    label { display: block; font-weight: 700; margin: 10px 0 6px; }
+    input, select, textarea, button { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; font-size: 16px; }
+    input, select { height: 42px; }
+    select { appearance: none; -webkit-appearance: none; background-color: #fff; }
+    button { background: #1fa884; border: none; color: #fff; font-weight: 700; cursor: pointer; margin-top: 14px; }
+    button:hover { background: #179977; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .msg { margin-top: 12px; font-weight: 700; }
+    .slots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .slot { width: auto; padding: 8px 12px; border: 1px solid #1fa884; color: #1fa884; background: #fff; }
+    .slot.active { background: #1fa884; color: #fff; }
+    .slot.booked { border-color: #d92d20; color: #d92d20; background: #fff5f5; cursor: not-allowed; }
+    .booking-success {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid #b8e3cf;
+      border-radius: 10px;
+      background: #ecfdf3;
+      color: #0f5132;
+    }
+    .booking-success.show { display: block; }
+    .booking-success-title { font-weight: 700; margin-bottom: 8px; }
+    .booking-success ul { margin: 0; padding-left: 18px; }
+    .booking-success li { margin-bottom: 4px; }
+    #__bs_notify__ { display: none !important; }
+    #__bs_notify__ + div { display: none !important; }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a id="backToMain" class="back-link" href="https://pzuortomedika.mk/" aria-label="Назад кон главна страна">
+      <span class="back-link-icon" aria-hidden="true">←</span>
+      <span>Кон почетна</span>
+    </a>
+    <div class="card">
+      <h1>Закажи термин</h1>
+
+      <div class="grid">
+        <div>
+          <label for="name">Име и презиме *</label>
+          <input id="name" type="text" />
+        </div>
+        <div>
+          <label for="email">Е-пошта *</label>
+          <input id="email" type="email" />
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="date">Датум *</label>
+          <input id="date" type="date" />
+        </div>
+        <div>
+          <label for="phone">Телефон *</label>
+          <input id="phone" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="15" />
+        </div>
+      </div>
+
+      <div id="selectedTime" class="muted" style="margin-top:6px;"></div>
+      <div id="slots" class="slots"></div>
+
+      <div>
+        <label for="service">Тип услуга *</label>
+        <select id="service">
+          <option value="" selected disabled>Изберете услуга</option>
+          <option value="преглед кај деца и бебиња">преглед кај деца и бебиња</option>
+          <option value="преглед кај возрасни">преглед кај возрасни</option>
+          <option value="ултразвучен преглед">ултразвучен преглед</option>
+          <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
+        </select>
+      </div>
+
+      <label for="notes">Белешки</label>
+      <textarea id="notes" rows="3"></textarea>
+
+      <button id="bookBtn">Потврди закажување</button>
+      <div id="msg" class="msg" role="status" aria-live="polite"></div>
+      <div id="bookingSuccess" class="booking-success" role="status" aria-live="polite">
+        <div class="booking-success-title">✅ Терминот е успешно закажан.</div>
+        <ul>
+          <li><strong>Датум:</strong> <span id="successDate"></span></li>
+          <li><strong>Време:</strong> <span id="successTime"></span></li>
+          <li><strong>Услуга:</strong> <span id="successService"></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dateEl = document.getElementById("date");
+    const slotsEl = document.getElementById("slots");
+    const phoneEl = document.getElementById("phone");
+    const backToMainEl = document.getElementById("backToMain");
+    const selectedTimeEl = document.getElementById("selectedTime");
+    const msgEl = document.getElementById("msg");
+    const bookBtnEl = document.getElementById("bookBtn");
+    const bookingSuccessEl = document.getElementById("bookingSuccess");
+    const successDateEl = document.getElementById("successDate");
+    const successTimeEl = document.getElementById("successTime");
+    const successServiceEl = document.getElementById("successService");
+    let selectedSlot = "";
+    let activeDoctorId = null;
+
+    function resolveBackUrl() {
+      if (window.MAIN_SITE_URL) return window.MAIN_SITE_URL;
+      if (document.referrer) return document.referrer;
+      return "https://pzuortomedika.mk/";
+    }
+
+    backToMainEl.href = resolveBackUrl();
+    backToMainEl.addEventListener("click", (event) => {
+      if (document.referrer && window.history.length > 1) {
+        event.preventDefault();
+        window.history.back();
+      }
+    });
+
+    const today = new Date();
+    dateEl.min = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+    function hideSuccessPanel() {
+      bookingSuccessEl.classList.remove("show");
+    }
+
+    function showSuccessPanel(payload) {
+      const [year, month, day] = String(payload.date).split("-");
+      const formattedDate = (year && month && day) ? `${day}.${month}.${year}` : payload.date;
+      successDateEl.textContent = formattedDate;
+      successTimeEl.textContent = payload.startTime;
+      successServiceEl.textContent = payload.serviceType;
+      bookingSuccessEl.classList.add("show");
+    }
+
+    async function loadDoctors() {
+      const res = await fetch("/api/doctors");
+      const doctors = await res.json();
+      activeDoctorId = doctors.length ? Number(doctors[0].id) : null;
+
+      if (!activeDoctorId) {
+        msgEl.style.color = "#b42318";
+        msgEl.textContent = "Моментално нема достапен доктор за закажување.";
+      }
+      await loadSlots();
+    }
+
+    async function loadSlots() {
+      selectedSlot = "";
+      selectedTimeEl.textContent = "";
+      slotsEl.innerHTML = "";
+      msgEl.textContent = "";
+      hideSuccessPanel();
+      const doctorId = activeDoctorId;
+      const date = dateEl.value;
+      if (!doctorId || !date) return;
+
+      const res = await fetch(`/api/slots?doctorId=${doctorId}&date=${date}`);
+      const data = await res.json();
+
+      const allSlots = Array.isArray(data.allSlots) ? data.allSlots : [];
+      const slotsToRender = allSlots.length ? allSlots : (Array.isArray(data.slots) ? data.slots : []);
+
+      if (!slotsToRender.length) {
+        slotsEl.innerHTML = "<span>Нема термини за избраниот датум.</span>";
+        return;
+      }
+
+      slotsToRender.forEach((slot) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "slot";
+        btn.textContent = slot.start;
+
+        const isUnavailable = slot.available === false || slot.status === "full" || slot.status === "blocked";
+        if (isUnavailable) {
+          btn.classList.add("booked");
+          btn.disabled = true;
+          btn.title = "Терминот е зафатен";
+        }
+
+        btn.addEventListener("click", () => {
+          if (isUnavailable) return;
+          [...slotsEl.querySelectorAll(".slot")].forEach(x => x.classList.remove("active"));
+          btn.classList.add("active");
+          selectedSlot = slot.start;
+          selectedTimeEl.textContent = `Избрано време: ${slot.start}`;
+        });
+        slotsEl.appendChild(btn);
+      });
+    }
+
+    async function book() {
+      hideSuccessPanel();
+      const payload = {
+        doctorId: Number(activeDoctorId),
+        date: dateEl.value,
+        startTime: selectedSlot,
+        patientName: document.getElementById("name").value.trim(),
+        patientEmail: document.getElementById("email").value.trim(),
+        patientPhone: document.getElementById("phone").value.trim(),
+        serviceType: document.getElementById("service").value.trim(),
+        notes: document.getElementById("notes").value.trim()
+      };
+
+      if (!payload.patientName || !payload.patientEmail || !payload.patientPhone || !payload.serviceType || !payload.date || !payload.startTime) {
+        msgEl.style.color = "#b42318";
+        msgEl.textContent = "Пополнете ги задолжителните полиња, изберете услуга и термин.";
+        return;
+      }
+
+      bookBtnEl.disabled = true;
+      bookBtnEl.textContent = "Се зачувува...";
+
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      bookBtnEl.disabled = false;
+      bookBtnEl.textContent = "Потврди закажување";
+
+      if (!res.ok) {
+        msgEl.style.color = "#b42318";
+        msgEl.textContent = data.error || "Настана грешка.";
+        await loadSlots();
+        return;
+      }
+
+      msgEl.style.color = "#18794e";
+      msgEl.textContent = "Терминот е успешно закажан.";
+      document.getElementById("name").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("phone").value = "";
+      document.getElementById("service").value = "";
+      document.getElementById("notes").value = "";
+      await loadSlots();
+      showSuccessPanel(payload);
+    }
+
+    dateEl.addEventListener("change", loadSlots);
+    phoneEl.addEventListener("input", () => {
+      phoneEl.value = phoneEl.value.replace(/\D/g, "");
+    });
+    bookBtnEl.addEventListener("click", book);
+
+    loadDoctors();
+  </script>
+</body>
+</html>

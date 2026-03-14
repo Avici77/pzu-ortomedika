@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="mk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ПЗУ Ортомедика - Admin Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f8f7; color: #133332; }
+    .wrap { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+    .card { width: 100%; max-width: 420px; background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 20px; }
+    h1 { margin-top: 0; }
+    label { display: block; font-weight: 700; margin: 8px 0 6px; }
+    input, button { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; }
+    button { background: #1fa884; border: none; color: #fff; font-weight: 700; cursor: pointer; margin-top: 12px; }
+    button:hover { background: #179977; }
+    .msg { margin-top: 10px; font-size: 14px; color: #b42318; }
+    #__bs_notify__ { display: none !important; }
+    #__bs_notify__ + div { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Админ најава</h1>
+      <label for="username">Корисничко име</label>
+      <input id="username" type="text" autocomplete="username" />
+
+      <label for="password">Лозинка</label>
+      <input id="password" type="password" autocomplete="current-password" />
+
+      <button id="loginBtn" type="button">Најави се</button>
+      <div id="msg" class="msg"></div>
+    </div>
+  </div>
+
+  <script>
+    const msg = document.getElementById("msg");
+
+    async function login() {
+      msg.textContent = "";
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!username || !password) {
+        msg.textContent = "Внесете корисничко име и лозинка.";
+        return;
+      }
+
+      const res = await fetch("/api/admin/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        msg.textContent = data.error || "Неуспешна најава.";
+        return;
+      }
+
+      window.location.href = "/admin";
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", login);
+    document.getElementById("password").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
+  </script>
+</body>
+</html>
