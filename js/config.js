@@ -1,1 +1,1 @@
-window.BOOKING_URL = "booking-system/public/index.html";
+window.BOOKING_URL = "https://pzu-ortomedika-booking.onrender.com";
