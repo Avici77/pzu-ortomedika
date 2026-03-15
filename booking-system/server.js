@@ -121,6 +121,7 @@ const ALLOWED_ORIGINS = new Set([
   "http://localhost:4001",
   "https://pzuortomedika.mk",
   "https://www.pzuortomedika.mk",
+  "https://pzu-ortomedika-booking.onrender.com",
 ]);
 
 app.use(
