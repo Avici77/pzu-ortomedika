@@ -13,9 +13,9 @@ services:
       - key: DB_PATH
         value: /var/data/data.db
       - key: ADMIN_USERNAME
-        sync: false
+        value: Noli
       - key: ADMIN_PASSWORD
-        sync: false
+        value: Danilo
     disk:
       name: booking-data
       mountPath: /var/data
