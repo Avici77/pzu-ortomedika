@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ПЗУ Ортомедика - Админ</title>
   <style>
+    *, *::before, *::after { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin: 0; background: #f4f8f7; color: #133332; }
-    .wrap { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
-    .card { background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .wrap { max-width: 1100px; width: 100%; margin: 20px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 16px; margin-bottom: 16px; width: 100%; }
     .top-actions { display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
     .section-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
     h1, h2 { margin-top: 0; }
@@ -17,13 +18,29 @@
     button { background: #1fa884; border: none; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; }
     button:hover { background: #179977; }
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .grid > div { min-width: 0; }
+    .grid > div { min-width: 0; overflow: hidden; }
     input[type="date"],
     input[type="time"],
     select {
       display: block;
       width: 100%;
       max-width: 100%;
+      min-width: 0;
+      inline-size: 100%;
+      min-inline-size: 0;
+    }
+    @supports (-webkit-touch-callout: none) {
+      input[type="date"],
+      input[type="time"] {
+        -webkit-appearance: none;
+        appearance: none;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      input[type="date"]::-webkit-date-and-time-value,
+      input[type="time"]::-webkit-date-and-time-value {
+        text-align: left;
+      }
     }
     .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
