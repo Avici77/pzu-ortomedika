@@ -12,7 +12,7 @@
     .section-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
     h1, h2 { margin-top: 0; }
     label { display: block; font-weight: 700; margin: 8px 0 6px; }
-    input, select, button { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; }
+    input, select, button { width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; }
     input, select { height: 42px; }
     button { background: #1fa884; border: none; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; }
     button:hover { background: #179977; }
@@ -27,7 +27,7 @@
     .row-actions { display: flex; gap: 8px; }
     .small { width: auto; padding: 6px 10px; }
     .day-view-head { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
-    .day-view-head > div { min-width: 220px; }
+    .day-view-head > div { min-width: 0; }
     .status-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
     .status-free { background: #e8f6f2; color: #0f7f64; }
     .status-booked { background: #ffeecf; color: #8f5f00; }
@@ -40,6 +40,20 @@
     #__bs_notify__ { display: none !important; }
     #__bs_notify__ + div { display: none !important; }
     @media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+    @media (hover: none) and (pointer: coarse) and (max-width: 1024px) {
+      .wrap { padding: 0 12px; margin: 16px auto; }
+      .card { padding: 12px; }
+      .grid { grid-template-columns: 1fr; gap: 8px; }
+      .day-view-head { flex-direction: column; align-items: stretch; gap: 8px; }
+      .day-view-head > div { width: 100%; }
+      .top-actions,
+      .section-head,
+      .row-actions { flex-direction: column; align-items: stretch; }
+      .row-actions { width: 100%; }
+      .small { width: 100%; }
+      input, select { height: 40px; padding: 8px; }
+      button { min-height: 40px; }
+    }
     @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
     @media (max-width: 480px) {
       .wrap { padding: 0 12px; margin: 16px auto; }

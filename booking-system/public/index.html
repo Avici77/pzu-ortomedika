@@ -47,10 +47,10 @@
     .back-link:active {
       transform: translateY(1px);
     }
-    .card { background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 18px; box-shadow: 0 8px 22px rgba(18,50,50,.06); }
+    .card { background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 18px; box-shadow: 0 8px 22px rgba(18,50,50,.06); margin: 0 auto; }
     h1 { margin-top: 0; }
     label { display: block; font-weight: 700; margin: 10px 0 6px; }
-    input, select, textarea, button { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; font-size: 16px; }
+    input, select, textarea, button { width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; font-size: 16px; }
     input, select { height: 42px; }
     select { appearance: none; -webkit-appearance: none; background-color: #fff; }
     button { background: #1fa884; border: none; color: #fff; font-weight: 700; cursor: pointer; margin-top: 14px; }
@@ -86,6 +86,19 @@
     #__bs_notify__ { display: none !important; }
     #__bs_notify__ + div { display: none !important; }
     @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    @media (hover: none) and (pointer: coarse) and (max-width: 1024px) {
+      .wrap { margin: 16px auto; padding: 0 12px; }
+      .card { padding: 14px; }
+      .grid { grid-template-columns: 1fr; gap: 10px; }
+      .back-link {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }
+      input, select { height: 40px; }
+      .slots { gap: 10px; }
+      .slot { flex: 1 1 calc(50% - 10px); justify-content: center; }
+    }
     @media (max-width: 480px) {
       .wrap { margin: 18px auto; padding: 0 12px; }
       .card { padding: 16px 14px; }
