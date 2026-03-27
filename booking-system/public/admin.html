@@ -17,6 +17,14 @@
     button { background: #1fa884; border: none; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; }
     button:hover { background: #179977; }
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .grid > div { min-width: 0; }
+    input[type="date"],
+    input[type="time"],
+    select {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+    }
     .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border-bottom: 1px solid #e4efec; text-align: left; padding: 8px; font-size: 14px; }
@@ -27,7 +35,7 @@
     .row-actions { display: flex; gap: 8px; }
     .small { width: auto; padding: 6px 10px; }
     .day-view-head { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
-    .day-view-head > div { min-width: 0; }
+    .day-view-head > div { min-width: 0; flex: 1 1 0; }
     .status-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
     .status-free { background: #e8f6f2; color: #0f7f64; }
     .status-booked { background: #ffeecf; color: #8f5f00; }
@@ -44,6 +52,7 @@
       .wrap { padding: 0 12px; margin: 16px auto; }
       .card { padding: 12px; }
       .grid { grid-template-columns: 1fr; gap: 8px; }
+      .grid > div { width: 100%; min-width: 0; }
       .day-view-head { flex-direction: column; align-items: stretch; gap: 8px; }
       .day-view-head > div { width: 100%; }
       .top-actions,
