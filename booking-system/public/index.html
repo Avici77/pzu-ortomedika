@@ -57,8 +57,17 @@
     button:hover { background: #179977; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .msg { margin-top: 12px; font-weight: 700; }
+    .service-hint {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border: 1px solid #f0d8a8;
+      border-radius: 8px;
+      background: #fff7e6;
+      color: #9a6700;
+      font-weight: 700;
+    }
     .slots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .slot { width: auto; padding: 8px 12px; border: 1px solid #1fa884; color: #1fa884; background: #fff; }
+    .slot { width: auto; min-height: 44px; padding: 10px 14px; border: 1px solid #1fa884; color: #1fa884; background: #fff; }
     .slot.active { background: #1fa884; color: #fff; }
     .slot.booked { border-color: #d92d20; color: #d92d20; background: #fff5f5; cursor: not-allowed; }
     .booking-success {
@@ -77,6 +86,27 @@
     #__bs_notify__ { display: none !important; }
     #__bs_notify__ + div { display: none !important; }
     @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) {
+      .wrap { margin: 18px auto; padding: 0 12px; }
+      .card { padding: 16px 14px; }
+      .back-link {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 12px;
+      }
+      h1 { font-size: 28px; line-height: 1.2; }
+      .slots { gap: 10px; }
+      .slot { flex: 1 1 calc(50% - 10px); justify-content: center; }
+      .booking-success { padding: 12px; }
+    }
+    @media (max-width: 360px) {
+      .wrap { padding: 0 10px; }
+      .card { padding: 14px 12px; }
+      h1 { font-size: 24px; }
+      .back-link { font-size: 14px; }
+      .service-hint { font-size: 14px; }
+      .slot { flex-basis: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -101,9 +131,24 @@
 
       <div class="grid">
         <div>
-          <label for="date">Датум *</label>
-          <input id="date" type="date" />
+          <label for="service">Тип услуга *</label>
+          <select id="service">
+            <option value="" selected disabled>Изберете услуга</option>
+            <option value="преглед за бебиња до 6 месеци">преглед за бебиња до 6 месеци</option>
+            <option value="преглед за деца над 6 месеци">преглед за деца над 6 месеци</option>
+            <option value="преглед кај возрасни">преглед кај возрасни</option>
+            <option value="ултразвучен преглед">ултразвучен преглед</option>
+            <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
+          </select>
+          <div id="serviceHint" class="service-hint" style="display:none;"></div>
         </div>
+        <div>
+          <label for="date">Датум *</label>
+          <input id="date" type="date" disabled />
+        </div>
+      </div>
+
+      <div class="grid">
         <div>
           <label for="phone">Телефон *</label>
           <input id="phone" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="15" />
@@ -112,17 +157,6 @@
 
       <div id="selectedTime" class="muted" style="margin-top:6px;"></div>
       <div id="slots" class="slots"></div>
-
-      <div>
-        <label for="service">Тип услуга *</label>
-        <select id="service">
-          <option value="" selected disabled>Изберете услуга</option>
-          <option value="преглед кај деца и бебиња">преглед кај деца и бебиња</option>
-          <option value="преглед кај возрасни">преглед кај возрасни</option>
-          <option value="ултразвучен преглед">ултразвучен преглед</option>
-          <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
-        </select>
-      </div>
 
       <label for="notes">Белешки</label>
       <textarea id="notes" rows="3"></textarea>
@@ -152,8 +186,57 @@
     const successDateEl = document.getElementById("successDate");
     const successTimeEl = document.getElementById("successTime");
     const successServiceEl = document.getElementById("successService");
+    const serviceEl = document.getElementById("service");
+    const serviceHintEl = document.getElementById("serviceHint");
     let selectedSlot = "";
     let activeDoctorId = null;
+    const BABY_SERVICE = "преглед за бебиња до 6 месеци";
+    const BABY_SERVICE_ALLOWED_DAYS = new Set([1, 4]);
+
+    function getWeekday(isoDate) {
+      return new Date(`${isoDate}T00:00:00`).getDay();
+    }
+
+    function isDateAllowedForService(isoDate, serviceType) {
+      if (!isoDate) return true;
+      if (serviceType !== BABY_SERVICE) return true;
+      return BABY_SERVICE_ALLOWED_DAYS.has(getWeekday(isoDate));
+    }
+
+    function resetSlotsState() {
+      selectedSlot = "";
+      selectedTimeEl.textContent = "";
+      slotsEl.innerHTML = "";
+    }
+
+    function updateDateAvailability() {
+      const selectedService = serviceEl.value.trim();
+      const hasService = Boolean(selectedService);
+      dateEl.disabled = !hasService;
+
+      if (!hasService) {
+        dateEl.value = "";
+        resetSlotsState();
+        return;
+      }
+
+      if (dateEl.value && !isDateAllowedForService(dateEl.value, selectedService)) {
+        dateEl.value = "";
+        resetSlotsState();
+        msgEl.style.color = "#b42318";
+        msgEl.textContent = "За бебиња до 6 месеци може да изберете само Понеделник или Четврток.";
+      }
+    }
+
+    function updateServiceHint() {
+      if (serviceEl.value === BABY_SERVICE) {
+        serviceHintEl.style.display = "block";
+        serviceHintEl.textContent = "Оваа услуга е достапна само во Понеделник и Четврток.";
+        return;
+      }
+      serviceHintEl.style.display = "none";
+      serviceHintEl.textContent = "";
+    }
 
     function resolveBackUrl() {
       if (window.MAIN_SITE_URL) return window.MAIN_SITE_URL;
@@ -198,23 +281,31 @@
     }
 
     async function loadSlots() {
-      selectedSlot = "";
-      selectedTimeEl.textContent = "";
-      slotsEl.innerHTML = "";
+      resetSlotsState();
       msgEl.textContent = "";
       hideSuccessPanel();
       const doctorId = activeDoctorId;
       const date = dateEl.value;
-      if (!doctorId || !date) return;
+      const serviceType = serviceEl.value.trim();
+      if (!doctorId || !serviceType || !date) return;
 
-      const res = await fetch(`/api/slots?doctorId=${doctorId}&date=${date}`);
+      if (!isDateAllowedForService(date, serviceType)) {
+        msgEl.style.color = "#b42318";
+        msgEl.textContent = "За бебиња до 6 месеци може да изберете само Понеделник или Четврток.";
+        slotsEl.innerHTML = "<span>Нема термини за избраниот датум.</span>";
+        return;
+      }
+
+      const serviceParam = serviceType ? `&serviceType=${encodeURIComponent(serviceType)}` : "";
+      const res = await fetch(`/api/slots?doctorId=${doctorId}&date=${date}${serviceParam}`);
       const data = await res.json();
 
       const allSlots = Array.isArray(data.allSlots) ? data.allSlots : [];
       const slotsToRender = allSlots.length ? allSlots : (Array.isArray(data.slots) ? data.slots : []);
 
       if (!slotsToRender.length) {
-        slotsEl.innerHTML = "<span>Нема термини за избраниот датум.</span>";
+        const reason = data.message ? String(data.message) : "Нема термини за избраниот датум.";
+        slotsEl.innerHTML = `<span>${reason}</span>`;
         return;
       }
 
@@ -251,13 +342,19 @@
         patientName: document.getElementById("name").value.trim(),
         patientEmail: document.getElementById("email").value.trim(),
         patientPhone: document.getElementById("phone").value.trim(),
-        serviceType: document.getElementById("service").value.trim(),
+        serviceType: serviceEl.value.trim(),
         notes: document.getElementById("notes").value.trim()
       };
 
       if (!payload.patientName || !payload.patientEmail || !payload.patientPhone || !payload.serviceType || !payload.date || !payload.startTime) {
         msgEl.style.color = "#b42318";
         msgEl.textContent = "Пополнете ги задолжителните полиња, изберете услуга и термин.";
+        return;
+      }
+
+      if (!isDateAllowedForService(payload.date, payload.serviceType)) {
+        msgEl.style.color = "#b42318";
+        msgEl.textContent = "За бебиња до 6 месеци може да изберете само Понеделник или Четврток.";
         return;
       }
 
@@ -286,18 +383,45 @@
       document.getElementById("name").value = "";
       document.getElementById("email").value = "";
       document.getElementById("phone").value = "";
-      document.getElementById("service").value = "";
+      serviceEl.value = "";
       document.getElementById("notes").value = "";
+      updateServiceHint();
       await loadSlots();
       showSuccessPanel(payload);
     }
 
-    dateEl.addEventListener("change", loadSlots);
+    dateEl.addEventListener("change", () => {
+      const selectedService = serviceEl.value.trim();
+      if (!selectedService) {
+        dateEl.value = "";
+        resetSlotsState();
+        msgEl.style.color = "#b42318";
+        msgEl.textContent = "Прво изберете услуга, па потоа датум.";
+        return;
+      }
+
+      if (!isDateAllowedForService(dateEl.value, selectedService)) {
+        dateEl.value = "";
+        resetSlotsState();
+        msgEl.style.color = "#b42318";
+        msgEl.textContent = "За бебиња до 6 месеци може да изберете само Понеделник или Четврток.";
+        return;
+      }
+
+      loadSlots();
+    });
     phoneEl.addEventListener("input", () => {
       phoneEl.value = phoneEl.value.replace(/\D/g, "");
     });
+    serviceEl.addEventListener("change", () => {
+      updateServiceHint();
+      updateDateAvailability();
+      loadSlots();
+    });
     bookBtnEl.addEventListener("click", book);
 
+    updateServiceHint();
+    updateDateAvailability();
     loadDoctors();
   </script>
 </body>

@@ -14,6 +14,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (IS_PRODUCTION ? "" : "Dani
 const MAX_APPOINTMENTS_PER_SLOT = 2;
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
 const SESSION_COOKIE = "admin_session";
+const BABY_SERVICE = "преглед за бебиња до 6 месеци";
+const BABY_SERVICE_ALLOWED_DAYS = new Set([1, 4]); // Monday, Thursday
 const adminSessions = new Map();
 
 if (IS_PRODUCTION && (!ADMIN_USERNAME || !ADMIN_PASSWORD)) {
@@ -205,6 +207,22 @@ function getDayOfWeek(dateStr) {
   return date.getDay();
 }
 
+function validateServiceDayRule(date, serviceType) {
+  const normalizedService = String(serviceType || "").trim().toLowerCase();
+  const babyServiceNormalized = BABY_SERVICE.toLowerCase();
+
+  if (normalizedService !== babyServiceNormalized) {
+    return null;
+  }
+
+  const dayOfWeek = getDayOfWeek(date);
+  if (!BABY_SERVICE_ALLOWED_DAYS.has(dayOfWeek)) {
+    return "Услугата „преглед за бебиња до 6 месеци“ е достапна само во Понеделник и Четврток.";
+  }
+
+  return null;
+}
+
 function parseIsoDateUTC(dateStr) {
   const [year, month, day] = String(dateStr).split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day));
@@ -317,9 +335,15 @@ app.get("/api/doctors", (_req, res) => {
 app.get("/api/slots", (req, res) => {
   const doctorId = Number(req.query.doctorId);
   const date = req.query.date;
+  const serviceType = String(req.query.serviceType || "");
 
   if (!doctorId || !validateDate(date)) {
     return res.status(400).json({ error: "doctorId и валиден date се задолжителни" });
+  }
+
+  const serviceRuleError = validateServiceDayRule(date, serviceType);
+  if (serviceRuleError) {
+    return res.json({ doctorId, date, slots: [], allSlots: [], message: serviceRuleError });
   }
 
   const allSlots = getSlotsWithAvailability(doctorId, date);
@@ -378,6 +402,11 @@ app.post("/api/appointments", (req, res) => {
   }
   if (!validateDate(date)) {
     return res.status(400).json({ error: "Невалиден датум" });
+  }
+
+  const serviceRuleError = validateServiceDayRule(date, serviceType);
+  if (serviceRuleError) {
+    return res.status(400).json({ error: serviceRuleError });
   }
 
   const doctor = db.prepare("SELECT * FROM doctors WHERE id = ? AND active = 1").get(doctorId);

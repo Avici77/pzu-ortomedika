@@ -1,3 +1,5 @@
+version: 1
+
 services:
   - type: web
     name: pzu-ortomedika-booking
@@ -16,7 +18,7 @@ services:
         value: Noli
       - key: ADMIN_PASSWORD
         value: Danilo
-    disk:
-      name: booking-data
-      mountPath: /var/data
-      sizeGB: 1
+    disks:
+      - name: booking-data
+        mountPath: /var/data
+        sizeGB: 1

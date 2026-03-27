@@ -8,6 +8,8 @@
     body { font-family: Arial, sans-serif; margin: 0; background: #f4f8f7; color: #133332; }
     .wrap { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
     .card { background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .top-actions { display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+    .section-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
     h1, h2 { margin-top: 0; }
     label { display: block; font-weight: 700; margin: 8px 0 6px; }
     input, select, button { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; }
@@ -15,6 +17,7 @@
     button { background: #1fa884; border: none; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; }
     button:hover { background: #179977; }
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border-bottom: 1px solid #e4efec; text-align: left; padding: 8px; font-size: 14px; }
     .muted { color: #607c77; font-size: 14px; }
@@ -38,11 +41,29 @@
     #__bs_notify__ + div { display: none !important; }
     @media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) {
+      .wrap { padding: 0 12px; margin: 16px auto; }
+      .card { padding: 12px; }
+      input, select, button { padding: 8px; }
+      input, select { height: 40px; }
+      .grid { gap: 8px; }
+      .day-view-head { flex-direction: column; align-items: stretch; gap: 8px; }
+      .day-view-head > div { min-width: 0; width: 100%; }
+      .top-actions,
+      .section-head,
+      .row-actions { flex-direction: column; align-items: stretch; }
+      .row-actions { width: 100%; }
+      .small { width: 100%; }
+      .table-wrap { margin-top: 10px; }
+      .table-wrap table { min-width: 720px; }
+      .table-wrap .small { width: auto; }
+      th, td { padding: 6px; font-size: 13px; white-space: nowrap; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+    <div class="top-actions">
       <button id="logoutBtn" class="small" style="margin:0;">Одјави се</button>
     </div>
     <div class="card">
@@ -57,10 +78,12 @@
         </div>
       </div>
       <p id="dayViewSummary" class="muted">Одбери датум за преглед.</p>
+      <div class="table-wrap">
       <table>
         <thead><tr><th>Време</th><th>Состојба</th><th>Пациент</th><th>Телефон</th><th>Услуга</th><th>Забелешка</th></tr></thead>
         <tbody id="dayViewRows"></tbody>
       </table>
+      </div>
     </div>
 
     <div class="card">
@@ -97,13 +120,15 @@
       <button id="addBlockRange" class="small">Блокирај период</button>
       <p id="blockRangeMessage" class="muted" role="status" aria-live="polite"></p>
 
+      <div class="table-wrap">
       <table>
         <tbody id="blockRows"></tbody>
       </table>
+      </div>
     </div>
 
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <div class="section-head">
         <h2 style="margin:0;">Термини</h2>
         <div class="row-actions" style="align-items:center;">
           <span id="appointmentsFilterLabel" class="muted"></span>
@@ -111,10 +136,12 @@
           <button id="exportAppointmentsCsv" class="small" style="margin:0;">Експорт CSV</button>
         </div>
       </div>
+      <div class="table-wrap">
       <table>
         <thead><tr><th>Датум</th><th>Време</th><th>Пациент</th><th>Телефон</th><th>Услуга</th><th>Статус</th><th></th></tr></thead>
         <tbody id="appointmentRows"></tbody>
       </table>
+      </div>
     </div>
 
   </div>

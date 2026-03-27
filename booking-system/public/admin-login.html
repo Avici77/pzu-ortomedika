@@ -36,29 +36,65 @@
   <script>
     const msg = document.getElementById("msg");
 
+    function showMessage(text) {
+      msg.textContent = text;
+    }
+
+    async function readResponseBody(res) {
+      const contentType = res.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        return res.json();
+      }
+      if (contentType.includes("text/html")) {
+        return { error: "Погрешен live preview URL. За админ користи: http://127.0.0.1:4001/admin/login" };
+      }
+      const text = await res.text();
+      return {
+        error: text
+          ? text.slice(0, 200)
+          : `Неочекуван одговор од серверот (HTTP ${res.status}). Провери дали е отворено: http://127.0.0.1:4001/admin/login`,
+      };
+    }
+
+    if (window.location.port === "3000") {
+      showMessage("Оваа страница е отворена преку homepage live preview. За најава отвори: http://127.0.0.1:4001/admin/login");
+    }
+
     async function login() {
-      msg.textContent = "";
+      showMessage("");
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value;
 
       if (!username || !password) {
-        msg.textContent = "Внесете корисничко име и лозинка.";
+        showMessage("Внесете корисничко име и лозинка.");
         return;
       }
 
-      const res = await fetch("/api/admin/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
-      });
+      try {
+        const res = await fetch("/api/admin/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
 
-      const data = await res.json();
-      if (!res.ok) {
-        msg.textContent = data.error || "Неуспешна најава.";
-        return;
+        const data = await readResponseBody(res);
+        if (!res.ok) {
+          if (window.location.port === "3000") {
+            showMessage("Најава не работи преку :3000 preview. Користи: http://127.0.0.1:4001/admin/login");
+            return;
+          }
+          showMessage(data.error || "Неуспешна најава.");
+          return;
+        }
+
+        window.location.href = "/admin";
+      } catch (_error) {
+        if (window.location.port === "3000") {
+          showMessage("Најава не работи преку :3000 preview. Користи: http://127.0.0.1:4001/admin/login");
+          return;
+        }
+        showMessage("Грешка при конекција со серверот. Проверете дали booking live server е пуштен.");
       }
-
-      window.location.href = "/admin";
     }
 
     document.getElementById("loginBtn").addEventListener("click", login);
