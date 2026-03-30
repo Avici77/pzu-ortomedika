@@ -11,6 +11,17 @@
     .card { background: #fff; border: 1px solid #d9e9e6; border-radius: 12px; padding: 16px; margin-bottom: 16px; width: 100%; }
     .top-actions { display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
     .section-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+    .appointments-head {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: nowrap;
+    }
+    .appointments-head h2 {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      margin: 0;
+    }
     h1, h2 { margin-top: 0; }
     label { display: block; font-weight: 700; margin: 8px 0 6px; }
     input, select, button { width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cfe1dd; }
@@ -50,6 +61,47 @@
     .msg-success { color: #18794e; }
     .msg-error { color: #b42318; }
     .row-actions { display: flex; gap: 8px; }
+    .appointments-tools {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: nowrap;
+      scrollbar-width: thin;
+    }
+    .appointments-tools .small {
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .appointments-tools .muted {
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .appointments-search {
+      width: 220px;
+      min-width: 220px;
+      max-width: 220px;
+      height: 36px;
+      margin: 0;
+      padding: 8px 10px;
+      flex: 0 0 auto;
+    }
+    .pagination-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .pagination-tools .small {
+      width: auto;
+      margin-top: 0;
+    }
+    .pagination-select {
+      width: auto;
+      min-width: 84px;
+      height: 36px;
+      padding: 6px 8px;
+    }
     .small { width: auto; padding: 6px 10px; }
     .day-view-head { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
     .day-view-head > div { min-width: 0; flex: 1 1 0; }
@@ -59,9 +111,57 @@
     .status-confirmed { background: #dff2ff; color: #0d5f92; }
     .status-cancelled { background: #f2f4f6; color: #586774; }
     .status-completed { background: #e8f5e9; color: #2e7d32; }
+    .man-slots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 20px; }
+    .man-slot { width: auto; min-height: 44px; padding: 10px 14px; border: 1px solid #1fa884; color: #1fa884; background: #fff; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .man-slot:hover { background: #eaf7f3; }
+    .man-slot.active { background: #1fa884; color: #fff; }
+    .man-slot:disabled { border-color: #d92d20; color: #d92d20; background: #fff5f5; cursor: not-allowed; }
+    .man-slots-label { font-size: 13px; color: #607c77; margin-top: 4px; }
     .inline-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
     .tool-btn { width: auto; padding: 6px 10px; font-size: 13px; background: #eaf7f3; color: #1a7f66; border: 1px solid #cfe1dd; }
     .tool-btn:hover { background: #dff2ec; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-card {
+      width: min(760px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid #d9e9e6;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .modal-head h3 { margin: 0; }
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .edit-grid > div { min-width: 0; }
+    .edit-grid .full { grid-column: 1 / -1; }
+    .edit-slots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .edit-slot { width: auto; min-height: 40px; padding: 8px 12px; border: 1px solid #1fa884; color: #1fa884; background: #fff; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .edit-slot.active { background: #1fa884; color: #fff; }
+    .edit-slot:disabled { border-color: #d92d20; color: #d92d20; background: #fff5f5; cursor: not-allowed; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .btn-secondary { background: #eef3f2; color: #17322f; border: 1px solid #cfe1dd; }
+    .btn-secondary:hover { background: #e3ecea; }
     #__bs_notify__ { display: none !important; }
     #__bs_notify__ + div { display: none !important; }
     @media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
@@ -76,9 +176,20 @@
       .section-head,
       .row-actions { flex-direction: column; align-items: stretch; }
       .row-actions { width: 100%; }
+      .appointments-head {
+        flex-direction: row;
+        align-items: center;
+      }
+      .appointments-tools {
+        flex-direction: row;
+        align-items: center;
+      }
       .small { width: 100%; }
+      .appointments-tools .small { width: auto; }
       input, select { height: 40px; padding: 8px; }
       button { min-height: 40px; }
+      .man-slots { gap: 10px; }
+      .man-slot { flex: 1 1 calc(50% - 10px); justify-content: center; }
     }
     @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
     @media (max-width: 480px) {
@@ -93,11 +204,28 @@
       .section-head,
       .row-actions { flex-direction: column; align-items: stretch; }
       .row-actions { width: 100%; }
+      .appointments-head {
+        flex-direction: row;
+        align-items: center;
+      }
+      .appointments-tools {
+        flex-direction: row;
+        align-items: center;
+      }
       .small { width: 100%; }
+      .appointments-tools .small { width: auto; }
       .table-wrap { margin-top: 10px; }
       .table-wrap table { min-width: 720px; }
       .table-wrap .small { width: auto; }
       th, td { padding: 6px; font-size: 13px; white-space: nowrap; }
+      .man-slots { gap: 10px; }
+      .man-slot { flex: 1 1 calc(50% - 10px); justify-content: center; }
+      .edit-grid { grid-template-columns: 1fr; }
+      .modal-actions { flex-direction: column; }
+      .modal-actions .small { width: 100%; }
+    }
+    @media (max-width: 360px) {
+      .man-slot { flex-basis: 100%; }
     }
   </style>
 </head>
@@ -128,22 +256,30 @@
 
     <div class="card">
       <h2>Додади термин (телефон)</h2>
-      <div class="grid">
-        <div><label>Датум <span class="req">*</span></label><input id="manDate" type="date" required /></div>
-        <div><label>Термин (време) <span class="req">*</span></label><select id="manTime" required><option value="">Прво одберете датум</option></select></div>
-        <div><label>Пациент *</label><input id="manPatient" type="text" required /></div>
-        <div><label>Телефон *</label><input id="manPhone" type="tel" inputmode="numeric" pattern="[0-9]+" required /></div>
+      <div class="grid" style="grid-template-columns: 1fr 1fr;">
+        <div><label>Пациент <span class="req">*</span></label><input id="manPatient" type="text" required /></div>
         <div><label>Е-пошта (опц.)</label><input id="manEmail" type="email" /></div>
-        <div><label>Услуга</label>
+        <div style="grid-column: 1 / -1;"><label>Тип услуга <span class="req">*</span></label>
           <select id="manService" required>
             <option value="" selected disabled>Изберете преглед</option>
+            <option value="контрола">контрола</option>
+            <option value="преглед за бебиња до 6 месеци">преглед за бебиња до 6 месеци (Пон/Чет)</option>
             <option value="преглед кај деца и бебиња">преглед кај деца и бебиња</option>
             <option value="преглед кај возрасни">преглед кај возрасни</option>
             <option value="ултразвучен преглед">ултразвучен преглед</option>
             <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
           </select>
         </div>
-        <div><label>Забелешка</label><input id="manNotes" type="text" placeholder="Телефонско закажување" /></div>
+        <div style="grid-column: 1 / -1;">
+          <label>Датум <span class="req">*</span></label><input id="manDate" type="date" required />
+          <div id="manSlotsWrap" style="margin-top:10px;">
+            <label>Слободни термини <span class="req">*</span></label>
+            <div id="manSlots" class="man-slots"></div>
+            <p id="manSlotsMsg" class="man-slots-label">Изберете услуга и датум за да видите слободни термини.</p>
+          </div>
+        </div>
+        <div style="grid-column: 1 / -1;"><label>Телефон <span class="req">*</span></label><input id="manPhone" type="tel" inputmode="numeric" pattern="[0-9]+" required /></div>
+        <div style="grid-column: 1 / -1;"><label>Забелешка</label><input id="manNotes" type="text" placeholder="Телефонско закажување" /></div>
       </div>
       <button id="addManualAppointment" class="small">Додади термин</button>
       <p id="manualMessage" class="muted" role="status" aria-live="polite"></p>
@@ -168,12 +304,13 @@
     </div>
 
     <div class="card">
-      <div class="section-head">
-        <h2 style="margin:0;">Термини</h2>
-        <div class="row-actions" style="align-items:center;">
+      <div class="section-head appointments-head">
+        <h2>Термини</h2>
+        <div class="row-actions appointments-tools" style="align-items:center;">
+          <input id="appointmentsSearch" class="appointments-search" type="text" placeholder="Пребарај пациент/телефон" />
           <span id="appointmentsFilterLabel" class="muted"></span>
+          <span id="appointmentsCountLabel" class="muted"></span>
           <button id="toggleAppointmentsScope" class="small" style="margin:0;">Прикажи сите</button>
-          <button id="exportAppointmentsCsv" class="small" style="margin:0;">Експорт CSV</button>
         </div>
       </div>
       <div class="table-wrap">
@@ -182,14 +319,72 @@
         <tbody id="appointmentRows"></tbody>
       </table>
       </div>
+      <div class="pagination-tools">
+        <span id="appointmentsPageInfo" class="muted">Страна 1 од 1</span>
+        <label for="appointmentsPageSize" class="muted" style="margin:0;">По страна</label>
+        <select id="appointmentsPageSize" class="pagination-select">
+          <option value="10">10</option>
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <button id="appointmentsPrev" class="small btn-secondary" type="button">Претходна</button>
+        <button id="appointmentsNext" class="small btn-secondary" type="button">Следна</button>
+      </div>
+    </div>
+
+    <div id="editModal" class="modal-backdrop" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+        <div class="modal-head">
+          <h3 id="editModalTitle">Измени термин</h3>
+          <button id="closeEditModal" class="small btn-secondary" style="margin:0;">Затвори</button>
+        </div>
+        <div class="edit-grid">
+          <div><label>Пациент <span class="req">*</span></label><input id="editPatient" type="text" /></div>
+          <div><label>Е-пошта</label><input id="editEmail" type="email" /></div>
+          <div class="full"><label>Тип услуга <span class="req">*</span></label>
+            <select id="editService">
+              <option value="контрола">контрола</option>
+              <option value="преглед за бебиња до 6 месеци">преглед за бебиња до 6 месеци (Пон/Чет)</option>
+              <option value="преглед кај деца и бебиња">преглед кај деца и бебиња</option>
+              <option value="преглед кај возрасни">преглед кај возрасни</option>
+              <option value="ултразвучен преглед">ултразвучен преглед</option>
+              <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
+            </select>
+          </div>
+          <div class="full"><label>Датум <span class="req">*</span></label><input id="editDate" type="date" /></div>
+          <div class="full"><label>Слободни термини <span class="req">*</span></label>
+            <div id="editSlots" class="edit-slots"></div>
+            <p id="editSlotsMsg" class="muted"></p>
+          </div>
+          <div><label>Телефон <span class="req">*</span></label><input id="editPhone" type="tel" inputmode="numeric" pattern="[0-9]+" /></div>
+          <div><label>Статус</label>
+            <select id="editStatus">
+              <option value="booked">Закажан</option>
+              <option value="confirmed">Потврден</option>
+              <option value="cancelled">Откажан</option>
+              <option value="completed">Завршен</option>
+            </select>
+          </div>
+          <div class="full"><label>Забелешка</label><input id="editNotes" type="text" /></div>
+        </div>
+        <p id="editMessage" class="muted" role="status" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button id="cancelEdit" class="small btn-secondary" type="button">Откажи</button>
+          <button id="saveEdit" class="small" type="button">Зачувај промени</button>
+        </div>
+      </div>
     </div>
 
   </div>
 
   <script>
     let currentDoctorId = null;
+    let selectedManSlot = "";
     const manDateEl = document.getElementById("manDate");
-    const manTimeEl = document.getElementById("manTime");
+    const manSlotsWrapEl = document.getElementById("manSlotsWrap");
+    const manSlotsEl = document.getElementById("manSlots");
+    const manSlotsMsgEl = document.getElementById("manSlotsMsg");
     const manPatientEl = document.getElementById("manPatient");
     const manPhoneEl = document.getElementById("manPhone");
     const manEmailEl = document.getElementById("manEmail");
@@ -205,7 +400,31 @@
     const dayViewRowsEl = document.getElementById("dayViewRows");
     const dayViewSummaryEl = document.getElementById("dayViewSummary");
     const appointmentsFilterLabelEl = document.getElementById("appointmentsFilterLabel");
+    const appointmentsCountLabelEl = document.getElementById("appointmentsCountLabel");
+    const appointmentsSearchEl = document.getElementById("appointmentsSearch");
+    const appointmentsPageInfoEl = document.getElementById("appointmentsPageInfo");
+    const appointmentsPageSizeEl = document.getElementById("appointmentsPageSize");
+    const appointmentsPrevEl = document.getElementById("appointmentsPrev");
+    const appointmentsNextEl = document.getElementById("appointmentsNext");
     const toggleAppointmentsScopeBtn = document.getElementById("toggleAppointmentsScope");
+    const editModalEl = document.getElementById("editModal");
+    const closeEditModalEl = document.getElementById("closeEditModal");
+    const cancelEditEl = document.getElementById("cancelEdit");
+    const saveEditEl = document.getElementById("saveEdit");
+    const editPatientEl = document.getElementById("editPatient");
+    const editEmailEl = document.getElementById("editEmail");
+    const editServiceEl = document.getElementById("editService");
+    const editDateEl = document.getElementById("editDate");
+    const editPhoneEl = document.getElementById("editPhone");
+    const editStatusEl = document.getElementById("editStatus");
+    const editNotesEl = document.getElementById("editNotes");
+    const editSlotsEl = document.getElementById("editSlots");
+    const editSlotsMsgEl = document.getElementById("editSlotsMsg");
+    const editMessageEl = document.getElementById("editMessage");
+    const appointmentsById = new Map();
+    let editingAppointmentId = null;
+    let selectedEditSlot = "";
+    let appointmentsPage = 1;
     let showAllAppointments = false;
 
     function toDateInputValue(date = new Date()) {
@@ -385,31 +604,62 @@
         .join("");
     }
 
+    function resetManSlots() {
+      selectedManSlot = "";
+      manSlotsEl.innerHTML = "";
+      manSlotsMsgEl.textContent = "";
+    }
+
     async function loadManualSlots() {
       const doctorId = currentDoctorId;
       const date = manDateEl.value;
 
-      if (!doctorId || !date) {
-        manTimeEl.innerHTML = `<option value="">Прво одберете датум</option>`;
+      resetManSlots();
+      if (!doctorId || !date) return;
+
+      if (!manServiceEl.value) {
+
+        manSlotsMsgEl.textContent = "Прво изберете тип на услуга за да видите слободни термини.";
         return;
       }
 
+      manSlotsMsgEl.textContent = "Се вчитува...";
+
       try {
-        const slotsResponse = await fetchJson(`/api/slots?doctorId=${doctorId}&date=${date}`);
-        const slots = Array.isArray(slotsResponse) ? slotsResponse : (slotsResponse.slots || []);
-        if (!slots.length) {
-          manTimeEl.innerHTML = `<option value="">Нема слободни термини</option>`;
+        const serviceParam = manServiceEl.value ? `&serviceType=${encodeURIComponent(manServiceEl.value)}` : "";
+        const slotsResponse = await fetchJson(`/api/slots?doctorId=${doctorId}&date=${date}${serviceParam}`);
+        const allSlots = Array.isArray(slotsResponse.allSlots) ? slotsResponse.allSlots
+          : Array.isArray(slotsResponse) ? slotsResponse
+          : (slotsResponse.slots || []);
+
+        manSlotsMsgEl.textContent = "";
+
+        if (!allSlots.length) {
+          manSlotsMsgEl.textContent = slotsResponse.message || "Нема слободни термини за овој датум.";
           return;
         }
-        manTimeEl.innerHTML = slots
-          .map((slot) => {
-            const safeStart = escapeHtml(slot.start);
-            const safeEnd = escapeHtml(slot.end);
-            return `<option value="${safeStart}">${safeStart} - ${safeEnd}</option>`;
-          })
-          .join("");
+
+        allSlots.forEach((slot) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "man-slot";
+          btn.textContent = `${slot.start} - ${slot.end}`;
+
+          const unavailable = slot.available === false || slot.status === "full" || slot.status === "blocked";
+          if (unavailable) {
+            btn.disabled = true;
+            btn.title = "Терминот е зафатен";
+          } else {
+            btn.addEventListener("click", () => {
+              manSlotsEl.querySelectorAll(".man-slot").forEach(b => b.classList.remove("active"));
+              btn.classList.add("active");
+              selectedManSlot = slot.start;
+            });
+          }
+          manSlotsEl.appendChild(btn);
+        });
       } catch {
-        manTimeEl.innerHTML = `<option value="">Грешка при вчитување</option>`;
+        manSlotsMsgEl.textContent = "Грешка при вчитување на термини.";
       }
     }
 
@@ -459,7 +709,17 @@
       toggleAppointmentsScopeBtn.textContent = "Прикажи сите";
     }
 
-    async function loadAppointments() {
+    async function loadAppointments(options = {}) {
+      const preserveScroll = Boolean(options.preserveScroll);
+      const prevScrollX = window.scrollX;
+      const prevScrollY = window.scrollY;
+      const restoreScrollIfNeeded = () => {
+        if (!preserveScroll) return;
+        requestAnimationFrame(() => {
+          window.scrollTo(prevScrollX, prevScrollY);
+        });
+      };
+
       const params = getAppointmentsFilterParams();
       const rows = await fetchJson(`/api/admin/appointments?${params.toString()}`);
       rows.sort((a, b) => {
@@ -467,9 +727,52 @@
         const right = `${b.date} ${b.start_time}`;
         return right.localeCompare(left);
       });
+
+      const query = String(appointmentsSearchEl.value || "").trim().toLowerCase();
+      const filteredRows = !query
+        ? rows
+        : rows.filter((r) => {
+            const patient = String(r.patient_name || "").toLowerCase();
+            const phone = String(r.patient_phone || "").toLowerCase();
+            return patient.includes(query) || phone.includes(query);
+          });
+
+      const uniquePatients = new Set(
+        filteredRows.map((r) => `${String(r.patient_name || "").trim().toLowerCase()}|${String(r.patient_phone || "").trim()}`)
+      ).size;
+
+      appointmentsCountLabelEl.textContent = showAllAppointments
+        ? `Вкупно пациенти: ${uniquePatients}`
+        : `Пациенти: ${uniquePatients}`;
+
+      appointmentsById.clear();
+      const pageSize = Math.max(1, Number(appointmentsPageSizeEl.value) || 25);
+      const totalRows = filteredRows.length;
+      const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+      if (appointmentsPage > totalPages) appointmentsPage = totalPages;
+      if (appointmentsPage < 1) appointmentsPage = 1;
+
+      const startIndex = (appointmentsPage - 1) * pageSize;
+      const pageRows = filteredRows.slice(startIndex, startIndex + pageSize);
+
+      appointmentsPageInfoEl.textContent = `Страна ${appointmentsPage} од ${totalPages} • Записи: ${totalRows}`;
+      appointmentsPrevEl.disabled = appointmentsPage <= 1;
+      appointmentsNextEl.disabled = appointmentsPage >= totalPages;
+
+      pageRows.forEach((r) => appointmentsById.set(Number(r.id), r));
+
       updateAppointmentsFilterUi();
       const tbody = document.getElementById("appointmentRows");
-      tbody.innerHTML = rows
+      if (!filteredRows.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="muted">Нема резултати за пребарувањето.</td></tr>`;
+        appointmentsPageInfoEl.textContent = "Страна 1 од 1 • Записи: 0";
+        appointmentsPrevEl.disabled = true;
+        appointmentsNextEl.disabled = true;
+        restoreScrollIfNeeded();
+        return;
+      }
+
+      tbody.innerHTML = pageRows
         .map((r) => {
           const safeId = Number(r.id) || 0;
           const safeDate = escapeHtml(formatDateToMk(r.date));
@@ -494,11 +797,141 @@
                   ].map(s => `<option value="${s.value}" ${s.value===r.status?"selected":""}>${s.label}</option>`).join("")}
                 </select>
               </td>
-              <td></td>
+              <td><button class="small" type="button" onclick="openEditModal(${safeId})">Измени</button></td>
             </tr>
           `;
         })
         .join("");
+
+      restoreScrollIfNeeded();
+    }
+
+    function resetEditSlots() {
+      selectedEditSlot = "";
+      editSlotsEl.innerHTML = "";
+      editSlotsMsgEl.textContent = "";
+    }
+
+    async function loadEditSlots() {
+      resetEditSlots();
+      const date = editDateEl.value;
+      if (!currentDoctorId || !date) return;
+      if (!editServiceEl.value) {
+        editSlotsMsgEl.textContent = "Прво изберете тип на услуга.";
+        return;
+      }
+
+      editSlotsMsgEl.textContent = "Се вчитува...";
+      const editing = appointmentsById.get(Number(editingAppointmentId));
+      const currentStart = editing ? String(editing.start_time) : "";
+
+      try {
+        const serviceParam = `&serviceType=${encodeURIComponent(editServiceEl.value)}`;
+        const res = await fetchJson(`/api/slots?doctorId=${currentDoctorId}&date=${date}${serviceParam}`);
+        const allSlots = Array.isArray(res.allSlots) ? res.allSlots : (Array.isArray(res) ? res : (res.slots || []));
+        editSlotsMsgEl.textContent = "";
+
+        if (!allSlots.length) {
+          editSlotsMsgEl.textContent = res.message || "Нема термини за избраниот датум.";
+          return;
+        }
+
+        allSlots.forEach((slot) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "edit-slot";
+          btn.textContent = `${slot.start} - ${slot.end}`;
+
+          const isCurrent = slot.start === currentStart;
+          const unavailable = slot.available === false || slot.status === "full" || slot.status === "blocked";
+
+          if (unavailable && !isCurrent) {
+            btn.disabled = true;
+          }
+
+          if (isCurrent) {
+            btn.classList.add("active");
+            selectedEditSlot = slot.start;
+          }
+
+          btn.addEventListener("click", () => {
+            editSlotsEl.querySelectorAll(".edit-slot").forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            selectedEditSlot = slot.start;
+          });
+
+          editSlotsEl.appendChild(btn);
+        });
+      } catch (error) {
+        editSlotsMsgEl.textContent = error.message || "Грешка при вчитување термини.";
+      }
+    }
+
+    function closeEditModal() {
+      editModalEl.classList.remove("show");
+      editModalEl.setAttribute("aria-hidden", "true");
+      editingAppointmentId = null;
+      resetEditSlots();
+      editMessageEl.textContent = "";
+      editMessageEl.className = "muted";
+    }
+
+    async function openEditModal(id) {
+      const row = appointmentsById.get(Number(id));
+      if (!row) return;
+
+      editingAppointmentId = Number(id);
+      editPatientEl.value = row.patient_name || "";
+      editEmailEl.value = row.patient_email || "";
+      editServiceEl.value = row.service_type || "контрола";
+      editDateEl.value = row.date || "";
+      editPhoneEl.value = row.patient_phone || "";
+      editStatusEl.value = row.status || "booked";
+      editNotesEl.value = row.notes || "";
+      editMessageEl.textContent = "";
+      editMessageEl.className = "muted";
+
+      editModalEl.classList.add("show");
+      editModalEl.setAttribute("aria-hidden", "false");
+      await loadEditSlots();
+    }
+
+    async function saveEditAppointment() {
+      if (!editingAppointmentId) return;
+
+      const payload = {
+        patientName: editPatientEl.value.trim(),
+        patientEmail: editEmailEl.value.trim(),
+        patientPhone: editPhoneEl.value.trim(),
+        serviceType: editServiceEl.value.trim(),
+        notes: editNotesEl.value.trim(),
+        date: editDateEl.value,
+        startTime: selectedEditSlot,
+        status: editStatusEl.value,
+      };
+
+      if (!payload.patientName || !payload.patientPhone || !payload.date || !payload.startTime) {
+        editMessageEl.className = "muted msg-error";
+        editMessageEl.textContent = "Внесете пациент, телефон, датум и термин.";
+        return;
+      }
+
+      if (payload.serviceType === BABY_SERVICE_NAME && !isBabyServiceAllowedDay(payload.date)) {
+        editMessageEl.className = "muted msg-error";
+        editMessageEl.textContent = "Услугата „преглед за бебиња до 6 месеци“ е достапна само во Понеделник и Четврток.";
+        return;
+      }
+
+      await fetchJson(`/api/admin/appointments/${editingAppointmentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      editMessageEl.className = "muted msg-success";
+      editMessageEl.textContent = "Терминот е успешно изменет.";
+      await Promise.all([loadAppointments(), loadDayView(), loadManualSlots()]);
+      closeEditModal();
     }
 
     async function addBlockRange() {
@@ -539,7 +972,7 @@
       const payload = {
         doctorId: currentDoctorId,
         date: manDateEl.value,
-        startTime: manTimeEl.value,
+        startTime: selectedManSlot,
         patientName: manPatientEl.value.trim(),
         patientPhone: manPhoneEl.value.trim(),
         patientEmail: manEmailEl.value.trim(),
@@ -549,7 +982,16 @@
 
       if (!payload.date || !payload.startTime || !payload.patientName || !payload.patientPhone) {
         manualMessageEl.className = "muted msg-error";
-        manualMessageEl.textContent = "Внесете датум, термин, пациент и телефон.";
+        manualMessageEl.textContent = !payload.startTime
+          ? "Изберете термин од листата на слободни термини."
+          : "Внесете датум, пациент и телефон.";
+        return;
+      }
+
+      // Validate baby service date restriction
+      if (payload.serviceType === BABY_SERVICE_NAME && !isBabyServiceAllowedDay(payload.date)) {
+        manualMessageEl.className = "muted msg-error";
+        manualMessageEl.textContent = "Услугата „преглед за бебиња до 6 месеци“ е достапна само во Понеделник и Четврток.";
         return;
       }
 
@@ -566,7 +1008,9 @@
       manEmailEl.value = "";
       manServiceEl.value = "";
       manNotesEl.value = "";
-      await Promise.all([loadAppointments(), loadManualSlots(), loadDayView()]);
+      resetManSlots();
+      manDateEl.value = "";
+      await Promise.all([loadAppointments(), loadDayView()]);
     }
 
     async function deleteBlock(id) {
@@ -585,6 +1029,7 @@
 
     window.deleteBlock = deleteBlock;
     window.updateStatus = updateStatus;
+    window.openEditModal = openEditModal;
 
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await fetch("/api/admin/auth/logout", { method: "POST" });
@@ -626,19 +1071,53 @@
         manualMessageEl.textContent = error.message;
       }
     });
-    document.getElementById("exportAppointmentsCsv").addEventListener("click", () => {
-      if (!currentDoctorId) return;
-      const params = getAppointmentsFilterParams();
-      window.location.href = `/api/admin/appointments/export.csv?${params.toString()}`;
+    closeEditModalEl.addEventListener("click", closeEditModal);
+    cancelEditEl.addEventListener("click", closeEditModal);
+    saveEditEl.addEventListener("click", async () => {
+      try {
+        await saveEditAppointment();
+      } catch (error) {
+        editMessageEl.className = "muted msg-error";
+        editMessageEl.textContent = error.message;
+      }
+    });
+    editPhoneEl.addEventListener("input", () => {
+      editPhoneEl.value = editPhoneEl.value.replace(/\D/g, "");
+    });
+    editServiceEl.addEventListener("change", loadEditSlots);
+    editDateEl.addEventListener("change", loadEditSlots);
+    editModalEl.addEventListener("click", (event) => {
+      if (event.target === editModalEl) {
+        closeEditModal();
+      }
     });
     toggleAppointmentsScopeBtn.addEventListener("click", async () => {
       showAllAppointments = !showAllAppointments;
+      appointmentsPage = 1;
       await loadAppointments();
+    });
+    appointmentsSearchEl.addEventListener("input", async () => {
+      appointmentsPage = 1;
+      await loadAppointments({ preserveScroll: true });
+    });
+    appointmentsPageSizeEl.addEventListener("change", async () => {
+      appointmentsPage = 1;
+      await loadAppointments({ preserveScroll: true });
+    });
+    appointmentsPrevEl.addEventListener("click", async () => {
+      if (appointmentsPage <= 1) return;
+      appointmentsPage -= 1;
+      await loadAppointments({ preserveScroll: true });
+    });
+    appointmentsNextEl.addEventListener("click", async () => {
+      appointmentsPage += 1;
+      await loadAppointments({ preserveScroll: true });
     });
     manDateEl.addEventListener("change", loadManualSlots);
     dayViewDateEl.addEventListener("change", async () => {
       await loadDayView();
       if (!showAllAppointments) {
+        appointmentsPage = 1;
         await loadAppointments();
       }
     });
@@ -646,12 +1125,52 @@
       manPhoneEl.value = manPhoneEl.value.replace(/\D/g, "");
     });
 
+    // Validate baby service date restriction (only Monday and Thursday)
+    const BABY_SERVICE_NAME = "преглед за бебиња до 6 месеци";
+    const BABY_SERVICE_ALLOWED_DAYS = new Set([1, 4]); // 1 = Monday, 4 = Thursday
+    
+    function isBabyServiceAllowedDay(dateString) {
+      if (!dateString) return false;
+      const date = new Date(dateString + "T00:00:00");
+      const dayOfWeek = date.getDay();
+      return BABY_SERVICE_ALLOWED_DAYS.has(dayOfWeek);
+    }
+
+    function validateBabyServiceDate() {
+      if (manServiceEl.value === BABY_SERVICE_NAME && manDateEl.value) {
+        if (!isBabyServiceAllowedDay(manDateEl.value)) {
+          manualMessageEl.textContent = "Услугата „преглед за бебиња до 6 месеци“ е достапна само во Понеделник и Четврток.";
+          manualMessageEl.className = "muted msg-error";
+          return false;
+        }
+      }
+      return true;
+    }
+
+    manServiceEl.addEventListener("change", () => {
+      resetManSlots();
+      manualMessageEl.textContent = "";
+      // If date already chosen, reload slots for new service
+      if (manServiceEl.value && manDateEl.value) {
+        if (manServiceEl.value === BABY_SERVICE_NAME) {
+          validateBabyServiceDate();
+        }
+        loadManualSlots();
+      }
+    });
+
+    manDateEl.addEventListener("change", () => {
+      if (manServiceEl.value === BABY_SERVICE_NAME) {
+        validateBabyServiceDate();
+      }
+    });
+
     const today = toDateInputValue();
     manDateEl.min = today;
     blFromDateEl.min = today;
     blToDateEl.min = today;
     dayViewDateEl.min = today;
-    manDateEl.value = today;
+    // manDate starts disabled; value set only after service is selected
     blFromDateEl.value = today;
     blToDateEl.value = today;
     dayViewDateEl.value = today;

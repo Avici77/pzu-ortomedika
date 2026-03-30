@@ -235,6 +235,13 @@ function formatIsoDateUTC(date) {
   return `${year}-${month}-${day}`;
 }
 
+function formatIsoDateLocal(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function formatDateToMk(dateStr) {
   const [year, month, day] = String(dateStr || "").split("-");
   if (!year || !month || !day) return String(dateStr || "");
@@ -602,22 +609,127 @@ app.get("/api/admin/appointments/export.csv", (req, res) => {
 
 app.patch("/api/admin/appointments/:id", (req, res) => {
   const id = Number(req.params.id);
-  const { status } = req.body;
+  const body = req.body || {};
   const allowed = ["booked", "confirmed", "cancelled", "completed"];
 
-  if (!allowed.includes(status)) {
-    return res.status(400).json({ error: "Невалиден статус" });
-  }
-
   const existing = db
-    .prepare("SELECT id, status, date, start_time, patient_name FROM appointments WHERE id = ?")
+    .prepare(
+      `SELECT id, doctor_id, status, date, start_time, end_time,
+              patient_name, patient_email, patient_phone, service_type, notes
+       FROM appointments
+       WHERE id = ?`
+    )
     .get(id);
 
   if (!existing) {
     return res.status(404).json({ error: "Терминот не е пронајден" });
   }
 
-  const result = db.prepare("UPDATE appointments SET status = ? WHERE id = ?").run(status, id);
+  const hasOnlyStatusUpdate =
+    Object.keys(body).length === 1 &&
+    Object.prototype.hasOwnProperty.call(body, "status");
+
+  if (hasOnlyStatusUpdate) {
+    const nextStatus = String(body.status || "").trim();
+    if (!allowed.includes(nextStatus)) {
+      return res.status(400).json({ error: "Невалиден статус" });
+    }
+
+    const result = db.prepare("UPDATE appointments SET status = ? WHERE id = ?").run(nextStatus, id);
+    if (!result.changes) {
+      return res.status(404).json({ error: "Терминот не е пронајден" });
+    }
+    return res.json({ ok: true });
+  }
+
+  const doctorId = Number(existing.doctor_id);
+  const patientName = Object.prototype.hasOwnProperty.call(body, "patientName")
+    ? String(body.patientName || "").trim()
+    : String(existing.patient_name || "").trim();
+  const patientEmail = Object.prototype.hasOwnProperty.call(body, "patientEmail")
+    ? String(body.patientEmail || "").trim()
+    : String(existing.patient_email || "").trim();
+  const patientPhone = Object.prototype.hasOwnProperty.call(body, "patientPhone")
+    ? String(body.patientPhone || "").trim()
+    : String(existing.patient_phone || "").trim();
+  const serviceType = Object.prototype.hasOwnProperty.call(body, "serviceType")
+    ? String(body.serviceType || "").trim()
+    : String(existing.service_type || "").trim();
+  const notes = Object.prototype.hasOwnProperty.call(body, "notes")
+    ? String(body.notes || "").trim()
+    : String(existing.notes || "").trim();
+  const date = Object.prototype.hasOwnProperty.call(body, "date")
+    ? String(body.date || "").trim()
+    : String(existing.date || "").trim();
+  const startTime = Object.prototype.hasOwnProperty.call(body, "startTime")
+    ? String(body.startTime || "").trim()
+    : String(existing.start_time || "").trim();
+  const nextStatus = Object.prototype.hasOwnProperty.call(body, "status")
+    ? String(body.status || "").trim()
+    : String(existing.status || "booked").trim();
+
+  if (!patientName || !patientPhone || !date || !startTime) {
+    return res.status(400).json({ error: "Недостасуваат задолжителни полиња" });
+  }
+  if (!validateDate(date)) {
+    return res.status(400).json({ error: "Невалиден датум" });
+  }
+  if (!allowed.includes(nextStatus)) {
+    return res.status(400).json({ error: "Невалиден статус" });
+  }
+
+  const serviceRuleError = validateServiceDayRule(date, serviceType);
+  if (serviceRuleError) {
+    return res.status(400).json({ error: serviceRuleError });
+  }
+
+  const doctor = db.prepare("SELECT id FROM doctors WHERE id = ? AND active = 1").get(doctorId);
+  if (!doctor) {
+    return res.status(404).json({ error: "Докторот не е пронајден" });
+  }
+
+  const sameSlot = existing.date === date && existing.start_time === startTime;
+  const allSlots = getSlotsWithAvailability(doctorId, date);
+  const selected = allSlots.find((slot) => slot.start === startTime);
+
+  if (!sameSlot) {
+    if (!selected || !selected.available) {
+      return res.status(409).json({ error: "Терминот повеќе не е достапен" });
+    }
+  }
+
+  const endTime = sameSlot
+    ? String(existing.end_time || "")
+    : String((selected && selected.end) || "");
+
+  if (!endTime) {
+    return res.status(409).json({ error: "Терминот повеќе не е достапен" });
+  }
+
+  const result = db.prepare(
+    `UPDATE appointments
+     SET patient_name = ?,
+         patient_email = ?,
+         patient_phone = ?,
+         service_type = ?,
+         notes = ?,
+         date = ?,
+         start_time = ?,
+         end_time = ?,
+         status = ?
+     WHERE id = ?`
+  ).run(
+    patientName,
+    patientEmail,
+    patientPhone,
+    serviceType,
+    notes,
+    date,
+    startTime,
+    endTime,
+    nextStatus,
+    id
+  );
 
   if (!result.changes) {
     return res.status(404).json({ error: "Терминот не е пронајден" });
@@ -706,6 +818,10 @@ app.get("/api/admin/blocks", (req, res) => {
   if (!doctorId) {
     return res.status(400).json({ error: "doctorId е задолжителен" });
   }
+
+  // Auto-clean historical blocks so admin list only keeps current/future dates.
+  const todayLocal = formatIsoDateLocal();
+  db.prepare("DELETE FROM doctor_blocks WHERE doctor_id = ? AND date < ?").run(doctorId, todayLocal);
 
   const rows = db
     .prepare(
