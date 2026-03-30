@@ -13161,6 +13161,74 @@ border-radius: 0;
 }
 }
 
+/* ── Doctor profile cards ── */
+.doctors-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 56px;
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.doctor-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(18, 50, 50, 0.09);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s;
+}
+.doctor-card:hover {
+  box-shadow: 0 14px 40px rgba(18, 50, 50, 0.14);
+}
+.doctor-photo-wrap {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #e8f0ee;
+}
+.doctor-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.doctor-info {
+  padding: 22px 24px 26px;
+  text-align: center;
+}
+.doctor-name {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #12212b;
+  font-family: "Arial Black", "Segoe UI", Arial, sans-serif;
+  line-height: 1.2;
+}
+.doctor-title {
+  margin: 0;
+  font-size: 14px;
+  color: #1b9d82;
+  font-weight: 500;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+@media (max-width: 767px) {
+  .doctors-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 36px;
+    max-width: 400px;
+  }
+  .doctor-name {
+    font-size: 18px;
+  }
+}
+/* ── end doctor cards ── */
+
 .booking-section {
 background: linear-gradient(180deg, #f7fbfa 0%, #ffffff 100%);
 }
