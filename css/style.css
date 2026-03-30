@@ -13228,6 +13228,31 @@ border-radius: 0;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   background: #e8f0ee;
+  position: relative;
+}
+.doctor-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  background: rgba(18, 50, 50, 0.88);
+  padding: 16px 14px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+}
+.doctor-card:hover .doctor-overlay {
+  opacity: 1;
+}
+.doctor-overlay-text {
+  margin: 0;
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1.55;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
 }
 .doctor-photo-img {
   width: 100%;
