@@ -13229,6 +13229,7 @@ border-radius: 0;
   overflow: hidden;
   background: #e8f0ee;
   position: relative;
+  cursor: pointer;
 }
 .doctor-overlay {
   position: absolute;
@@ -13244,15 +13245,17 @@ border-radius: 0;
   transition: opacity 0.3s ease, visibility 0s linear 0.3s;
   overflow-y: auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   z-index: 2;
   will-change: opacity;
+  -webkit-overflow-scrolling: touch;
 }
 .doctor-card:hover .doctor-overlay,
 .doctor-card:focus-within .doctor-overlay,
 .doctor-photo-wrap:hover .doctor-overlay,
 .doctor-photo-wrap:focus-within .doctor-overlay,
-.doctor-photo-wrap:active .doctor-overlay {
+.doctor-photo-wrap:active .doctor-overlay,
+.doctor-photo-wrap.is-open .doctor-overlay {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;

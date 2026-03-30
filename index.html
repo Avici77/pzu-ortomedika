@@ -448,6 +448,30 @@
  window.location.href = href;
  }
  });
+
+ // On touch devices, tap doctor photos to keep overlay open for full-text reading.
+ var touchOverlayMode = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+ if (touchOverlayMode) {
+ $(".doctor-photo-wrap").on("click", function (e) {
+ var $wrap = $(this);
+ if ($wrap.hasClass("is-open")) {
+ $wrap.removeClass("is-open");
+ return;
+ }
+
+ if (!$wrap.hasClass("is-open")) {
+ e.preventDefault();
+ $(".doctor-photo-wrap.is-open").not($wrap).removeClass("is-open");
+ $wrap.addClass("is-open");
+ }
+ });
+
+ $(document).on("click touchstart", function (e) {
+ if ($(e.target).closest(".doctor-photo-wrap").length === 0) {
+ $(".doctor-photo-wrap.is-open").removeClass("is-open");
+ }
+ });
+ }
  });
  </script>
 
