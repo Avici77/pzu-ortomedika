@@ -16,6 +16,9 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
 const SESSION_COOKIE = "admin_session";
 const BABY_SERVICE = "преглед за бебиња до 6 месеци";
 const BABY_SERVICE_ALLOWED_DAYS = new Set([1, 4]); // Monday, Thursday
+const WEEKDAY_BREAK_DAYS = new Set([1, 4]); // Monday, Thursday
+const WEEKDAY_BREAK_START = "16:00";
+const WEEKDAY_BREAK_END = "16:30";
 const adminSessions = new Map();
 
 if (IS_PRODUCTION && (!ADMIN_USERNAME || !ADMIN_PASSWORD)) {
@@ -242,6 +245,13 @@ function formatIsoDateLocal(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
+function getLocalNowParts(date = new Date()) {
+  return {
+    isoDate: formatIsoDateLocal(date),
+    minutes: (date.getHours() * 60) + date.getMinutes(),
+  };
+}
+
 function formatDateToMk(dateStr) {
   const [year, month, day] = String(dateStr || "").split("-");
   if (!year || !month || !day) return String(dateStr || "");
@@ -274,6 +284,9 @@ function getSlotsWithAvailability(doctorId, date) {
   const doctor = db.prepare("SELECT * FROM doctors WHERE id = ? AND active = 1").get(doctorId);
   if (!doctor) return [];
 
+  const now = getLocalNowParts();
+  const isToday = date === now.isoDate;
+
   const dayOfWeek = getDayOfWeek(date);
   const availability = db
     .prepare(
@@ -289,6 +302,14 @@ function getSlotsWithAvailability(doctorId, date) {
     )
     .all(doctorId, date)
     .map((block) => ({ start: toMinutes(block.start_time), end: toMinutes(block.end_time) }));
+
+  // Recurring weekly break for both doctors: Monday/Thursday 16:00-16:30.
+  if (WEEKDAY_BREAK_DAYS.has(dayOfWeek)) {
+    blocks.push({
+      start: toMinutes(WEEKDAY_BREAK_START),
+      end: toMinutes(WEEKDAY_BREAK_END),
+    });
+  }
 
   const occupied = db
     .prepare(
@@ -309,10 +330,13 @@ function getSlotsWithAvailability(doctorId, date) {
       const activeOverlapCount = occupied.filter(
         (item) => !(slotEnd <= item.start || slotStart >= item.end)
       ).length;
+      const hasStarted = isToday && slotStart < now.minutes;
 
       const remaining = hasBlockOverlap
         ? 0
-        : Math.max(0, MAX_APPOINTMENTS_PER_SLOT - activeOverlapCount);
+        : hasStarted
+          ? 0
+          : Math.max(0, MAX_APPOINTMENTS_PER_SLOT - activeOverlapCount);
 
       slots.push({
         start: toTime(slotStart),
@@ -320,7 +344,7 @@ function getSlotsWithAvailability(doctorId, date) {
         available: remaining > 0,
         remaining,
         capacity: MAX_APPOINTMENTS_PER_SLOT,
-        status: hasBlockOverlap ? "blocked" : (remaining > 0 ? "available" : "full"),
+        status: hasBlockOverlap ? "blocked" : (hasStarted ? "past" : (remaining > 0 ? "available" : "full")),
       });
     }
   });

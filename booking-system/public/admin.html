@@ -263,8 +263,9 @@
           <select id="manService" required>
             <option value="" selected disabled>Изберете преглед</option>
             <option value="контрола">контрола</option>
+            <option value="интервенција">интервенција</option>
             <option value="преглед за бебиња до 6 месеци">преглед за бебиња до 6 месеци (Пон/Чет)</option>
-            <option value="преглед кај деца и бебиња">преглед кај деца и бебиња</option>
+            <option value="преглед за деца над 6 месеци">преглед за деца над 6 месеци</option>
             <option value="преглед кај возрасни">преглед кај возрасни</option>
             <option value="ултразвучен преглед">ултразвучен преглед</option>
             <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
@@ -345,8 +346,9 @@
           <div class="full"><label>Тип услуга <span class="req">*</span></label>
             <select id="editService">
               <option value="контрола">контрола</option>
+              <option value="интервенција">интервенција</option>
               <option value="преглед за бебиња до 6 месеци">преглед за бебиња до 6 месеци (Пон/Чет)</option>
-              <option value="преглед кај деца и бебиња">преглед кај деца и бебиња</option>
+              <option value="преглед за деца над 6 месеци">преглед за деца над 6 месеци</option>
               <option value="преглед кај возрасни">преглед кај возрасни</option>
               <option value="ултразвучен преглед">ултразвучен преглед</option>
               <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
@@ -370,7 +372,6 @@
         </div>
         <p id="editMessage" class="muted" role="status" aria-live="polite"></p>
         <div class="modal-actions">
-          <button id="cancelEdit" class="small btn-secondary" type="button">Откажи</button>
           <button id="saveEdit" class="small" type="button">Зачувај промени</button>
         </div>
       </div>
@@ -409,7 +410,6 @@
     const toggleAppointmentsScopeBtn = document.getElementById("toggleAppointmentsScope");
     const editModalEl = document.getElementById("editModal");
     const closeEditModalEl = document.getElementById("closeEditModal");
-    const cancelEditEl = document.getElementById("cancelEdit");
     const saveEditEl = document.getElementById("saveEdit");
     const editPatientEl = document.getElementById("editPatient");
     const editEmailEl = document.getElementById("editEmail");
@@ -1072,7 +1072,6 @@
       }
     });
     closeEditModalEl.addEventListener("click", closeEditModal);
-    cancelEditEl.addEventListener("click", closeEditModal);
     saveEditEl.addEventListener("click", async () => {
       try {
         await saveEditAppointment();
