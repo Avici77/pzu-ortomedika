@@ -308,6 +308,8 @@
       <div class="section-head appointments-head">
         <h2>Термини</h2>
         <div class="row-actions appointments-tools" style="align-items:center;">
+          <button id="appointmentsPrint" class="small btn-secondary" type="button" style="margin:0;">Печати</button>
+          <button id="appointmentsExport" class="small btn-secondary" type="button" style="margin:0;">CSV</button>
           <input id="appointmentsSearch" class="appointments-search" type="text" placeholder="Пребарај пациент/телефон" />
           <span id="appointmentsFilterLabel" class="muted"></span>
           <span id="appointmentsCountLabel" class="muted"></span>
@@ -403,6 +405,8 @@
     const appointmentsFilterLabelEl = document.getElementById("appointmentsFilterLabel");
     const appointmentsCountLabelEl = document.getElementById("appointmentsCountLabel");
     const appointmentsSearchEl = document.getElementById("appointmentsSearch");
+    const appointmentsPrintEl = document.getElementById("appointmentsPrint");
+    const appointmentsExportEl = document.getElementById("appointmentsExport");
     const appointmentsPageInfoEl = document.getElementById("appointmentsPageInfo");
     const appointmentsPageSizeEl = document.getElementById("appointmentsPageSize");
     const appointmentsPrevEl = document.getElementById("appointmentsPrev");
@@ -426,6 +430,7 @@
     let selectedEditSlot = "";
     let appointmentsPage = 1;
     let showAllAppointments = false;
+    let latestFilteredAppointments = [];
 
     function toDateInputValue(date = new Date()) {
       const year = date.getFullYear();
@@ -695,6 +700,80 @@
       return params;
     }
 
+    function getAppointmentsExportUrl() {
+      const params = getAppointmentsFilterParams();
+      return `/api/admin/appointments/export.csv?${params.toString()}`;
+    }
+
+    function printAppointments() {
+      const rows = latestFilteredAppointments.slice();
+      if (!rows.length) {
+        window.alert("Нема термини за печатење.");
+        return;
+      }
+
+      const query = String(appointmentsSearchEl.value || "").trim();
+      const scopeLabel = showAllAppointments
+        ? "Сите датуми"
+        : (dayViewDateEl.value ? formatDateToMk(dayViewDateEl.value) : "Избран датум");
+
+      const tableRows = rows.map((row) => `
+        <tr>
+          <td>${escapeHtml(formatDateToMk(row.date))}</td>
+          <td>${escapeHtml(row.start_time)} - ${escapeHtml(row.end_time)}</td>
+          <td>${escapeHtml(row.patient_name)}</td>
+          <td>${escapeHtml(row.patient_phone)}</td>
+          <td>${escapeHtml(row.service_type)}</td>
+          <td>${escapeHtml(statusLabel(row.status))}</td>
+        </tr>
+      `).join("");
+
+      const win = window.open("", "_blank", "width=1100,height=800");
+      if (!win) {
+        window.alert("Дозволете pop-up прозорец за печатење.");
+        return;
+      }
+
+      win.document.write(`<!doctype html>
+<html lang="mk">
+<head>
+  <meta charset="utf-8" />
+  <title>Термини за печатење</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #133332; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    .meta { margin: 0 0 16px; color: #607c77; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #d9e9e6; padding: 8px; text-align: left; font-size: 13px; vertical-align: top; }
+    th { background: #f4f8f7; }
+    @media print { body { margin: 12mm; } }
+  </style>
+</head>
+<body>
+  <h1>Термини</h1>
+  <p class="meta">Опсег: ${escapeHtml(scopeLabel)}${query ? ` • Пребарување: ${escapeHtml(query)}` : ""} • Записи: ${rows.length}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Датум</th>
+        <th>Време</th>
+        <th>Пациент</th>
+        <th>Телефон</th>
+        <th>Услуга</th>
+        <th>Статус</th>
+      </tr>
+    </thead>
+    <tbody>${tableRows}</tbody>
+  </table>
+</body>
+</html>`);
+      win.document.close();
+      win.focus();
+      setTimeout(() => {
+        win.print();
+      }, 250);
+    }
+
     function updateAppointmentsFilterUi() {
       if (showAllAppointments) {
         appointmentsFilterLabelEl.textContent = "Прикажани: сите датуми";
@@ -736,6 +815,7 @@
             const phone = String(r.patient_phone || "").toLowerCase();
             return patient.includes(query) || phone.includes(query);
           });
+      latestFilteredAppointments = filteredRows.slice();
 
       const uniquePatients = new Set(
         filteredRows.map((r) => `${String(r.patient_name || "").trim().toLowerCase()}|${String(r.patient_phone || "").trim()}`)
@@ -1098,6 +1178,12 @@
     appointmentsSearchEl.addEventListener("input", async () => {
       appointmentsPage = 1;
       await loadAppointments({ preserveScroll: true });
+    });
+    appointmentsExportEl.addEventListener("click", () => {
+      window.location.href = getAppointmentsExportUrl();
+    });
+    appointmentsPrintEl.addEventListener("click", () => {
+      printAppointments();
     });
     appointmentsPageSizeEl.addEventListener("change", async () => {
       appointmentsPage = 1;
