@@ -706,7 +706,9 @@
     }
 
     function printAppointments() {
-      const rows = latestFilteredAppointments.slice();
+      const rows = latestFilteredAppointments.filter(
+        (row) => String(row.status || "").toLowerCase() !== "cancelled"
+      );
       if (!rows.length) {
         window.alert("Нема термини за печатење.");
         return;
