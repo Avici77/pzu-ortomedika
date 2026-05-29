@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 4000;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || (IS_PRODUCTION ? "" : "Noli");
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (IS_PRODUCTION ? "" : "Danilo");
-const MAX_APPOINTMENTS_PER_SLOT = 2;
+const MAX_APPOINTMENTS_PER_SLOT = 1;
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
 const SESSION_COOKIE = "admin_session";
 const BABY_SERVICE = "преглед за бебиња до 6 месеци";
