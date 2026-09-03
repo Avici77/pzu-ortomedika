@@ -176,8 +176,8 @@
           <label for="service">Тип услуга *</label>
           <select id="service">
             <option value="" selected disabled>Изберете услуга</option>
-            <option value="преглед за бебиња до 6 месеци">преглед за бебиња до 6 месеци</option>
-            <option value="преглед за деца над 6 месеци">преглед за деца над 6 месеци</option>
+            <option value="преглед за бебиња до 9 месеци">преглед за бебиња до 9 месеци</option>
+            <option value="преглед за деца над 9 месеци">преглед за деца над 9 месеци</option>
             <option value="преглед кај возрасни">преглед кај возрасни</option>
             <option value="ултразвучен преглед">ултразвучен преглед</option>
             <option value="интраартикуларни инјекции">интраартикуларни инјекции</option>
@@ -232,7 +232,7 @@
     const serviceHintEl = document.getElementById("serviceHint");
     let selectedSlot = "";
     let activeDoctorId = null;
-    const BABY_SERVICE = "преглед за бебиња до 6 месеци";
+    const BABY_SERVICE = "преглед за бебиња до 9 месеци";
     const BABY_SERVICE_ALLOWED_DAYS = new Set([1, 4]);
 
     function getWeekday(isoDate) {
@@ -266,7 +266,7 @@
         dateEl.value = "";
         resetSlotsState();
         msgEl.style.color = "#b42318";
-        msgEl.textContent = "За бебиња до 6 месеци може да изберете само Понеделник или Четврток.";
+        msgEl.textContent = "За бебиња до 9 месеци може да изберете само Понеделник или Четврток.";
       }
     }
 
@@ -333,7 +333,7 @@
 
       if (!isDateAllowedForService(date, serviceType)) {
         msgEl.style.color = "#b42318";
-        msgEl.textContent = "За бебиња до 6 месеци може да изберете само Понеделник или Четврток.";
+        msgEl.textContent = "За бебиња до 9 месеци може да изберете само Понеделник или Четврток.";
         slotsEl.innerHTML = "<span>Нема термини за избраниот датум.</span>";
         return;
       }
@@ -396,7 +396,7 @@
 
       if (!isDateAllowedForService(payload.date, payload.serviceType)) {
         msgEl.style.color = "#b42318";
-        msgEl.textContent = "За бебиња до 6 месеци може да изберете само Понеделник или Четврток.";
+        msgEl.textContent = "За бебиња до 9 месеци може да изберете само Понеделник или Четврток.";
         return;
       }
 
@@ -446,7 +446,7 @@
         dateEl.value = "";
         resetSlotsState();
         msgEl.style.color = "#b42318";
-        msgEl.textContent = "За бебиња до 6 месеци може да изберете само Понеделник или Четврток.";
+        msgEl.textContent = "За бебиња до 9 месеци може да изберете само Понеделник или Четврток.";
         return;
       }
 

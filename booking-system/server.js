@@ -14,7 +14,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (IS_PRODUCTION ? "" : "Dani
 const MAX_APPOINTMENTS_PER_SLOT = 1;
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
 const SESSION_COOKIE = "admin_session";
-const BABY_SERVICE = "преглед за бебиња до 6 месеци";
+const BABY_SERVICE = "преглед за бебиња до 9 месеци";
 const BABY_SERVICE_ALLOWED_DAYS = new Set([1, 4]); // Monday, Thursday
 const WEEKDAY_BREAK_DAYS = new Set([1, 4]); // Monday, Thursday
 const WEEKDAY_BREAK_START = "16:00";
@@ -220,7 +220,7 @@ function validateServiceDayRule(date, serviceType) {
 
   const dayOfWeek = getDayOfWeek(date);
   if (!BABY_SERVICE_ALLOWED_DAYS.has(dayOfWeek)) {
-    return "Услугата „преглед за бебиња до 6 месеци“ е достапна само во Понеделник и Четврток.";
+    return "Услугата „преглед за бебиња до 9 месеци“ е достапна само во Понеделник и Четврток.";
   }
 
   return null;
